@@ -1,0 +1,21 @@
+<h2 id="title">Welcome to Elemental :)</h2>
+
+<aside>
+  Need help? <a href="#">Check out the guides.</a>
+</aside>
+
+<form class=".theme-form" action="index.html" method="post" {{ action 'edit' on='submit'}}>
+  <label>Font Family</label>
+  {{input type='text' value=fontFamily}}
+  <br>
+
+  <label>Scale</label>
+  {{input type='text' value=scale}}
+  <br>
+
+  <label>Color</label>
+  {{input type='text' value=color}}
+  <br>
+
+  {{input type="submit" value="SAVE THEME"}}
+</form>
