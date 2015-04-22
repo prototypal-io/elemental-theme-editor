@@ -1,21 +1,22 @@
-<h2 id="title">Welcome to Elemental :)</h2>
+<button {{action 'reload'}}>reload</button>
 
-<aside>
-  Need help? <a href="#">Check out the guides.</a>
-</aside>
+<form {{action 'edit' on='submit'}}>
+  <label>
+    Font Family
+    {{input type='text' value=fontFamily}}
+  </label>
 
-<form class=".theme-form" action="index.html" method="post" {{ action 'edit' on='submit'}}>
-  <label>Font Family</label>
-  {{input type='text' value=fontFamily}}
   <br>
 
-  <label>Scale</label>
-  {{input type='text' value=scale}}
-  <br>
+  <label>
+    Scale
+    {{input type='text' value=scale}}
+  </label>
 
-  <label>Color</label>
-  {{input type='text' value=color}}
-  <br>
+  <label>
+    Color
+    {{input type='text' value=color}}
+  </label>
 
-  {{input type="submit" value="SAVE THEME"}}
+  <button {{action 'edit'}}>Save theme</button>
 </form>
