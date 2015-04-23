@@ -1,7 +1,8 @@
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
+export default Ember.Component.extend({
   init: function() {
+    this._super(...arguments);
     this._loadElementalActions();
     Ember.$.getJSON('http://localhost:4200/theme').then(json => {
       this.setProperties(json);
@@ -35,7 +36,7 @@ export default Ember.Controller.extend({
         contentType: 'application/json',
         data: JSON.stringify(data)
       }).then(json => {
-        chrome.devtools.inspectedWindow.eval("elemental.reloadCSS();");
+        chrome.devtools.inspectedWindow.eval("Elemental.reloadCSS();");
       }, xhr => {
         console.log('failure');
       });

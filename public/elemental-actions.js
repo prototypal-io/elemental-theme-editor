@@ -1,4 +1,4 @@
-window.elemental = {
+window.Elemental = {
   reloadCSS: function() {
     var links = $('link');
     links.remove()
