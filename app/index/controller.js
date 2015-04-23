@@ -9,12 +9,12 @@ export default Ember.Controller.extend({
   },
 
   _loadElementalActions() {
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", chrome.extension.getURL('/elemental-actions.js'), false);
-    xhr.send();
-    let elementalActions = xhr.responseText;
+    // let xhr = new XMLHttpRequest();
+    // xhr.open("GET", chrome.extension.getURL('/elemental-actions.js'), false);
+    // xhr.send();
+    // let elementalActions = xhr.responseText;
 
-    chrome.devtools.inspectedWindow.eval(elementalActions);
+    // chrome.devtools.inspectedWindow.eval(elementalActions);
   },
 
   fontFamily: null,
