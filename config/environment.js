@@ -2,10 +2,10 @@
 
 module.exports = function(environment) {
   var ENV = {
-    modulePrefix: 'dev-tools',
+    modulePrefix: 'elemental-theme-editor',
     environment: environment,
     baseURL: '/',
-    locationType: 'hash',
+    locationType: 'auto',
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
@@ -18,11 +18,6 @@ module.exports = function(environment) {
       // when it is created
     }
   };
-
-  ENV.contentSecurityPolicy = {
-    '*': '*',
-    'connect-src': "'self' http://localhost:4200"
-  }
 
   if (environment === 'development') {
     // ENV.APP.LOG_RESOLVER = true;

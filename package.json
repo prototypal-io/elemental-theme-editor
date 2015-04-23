@@ -1,7 +1,7 @@
 {
-  "name": "dev-tools",
+  "name": "elemental-theme-editor",
   "version": "0.0.0",
-  "description": "Small description for dev-tools goes here",
+  "description": "Small description for elemental-theme-editor goes here",
   "private": true,
   "directories": {
     "doc": "doc",
