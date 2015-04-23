@@ -1,1 +1,1 @@
-chrome.devtools.panels.create("Prototypal", null, "index.html");
+chrome.devtools.panels.create("Elemental", null, "index.html");

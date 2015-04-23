@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
 
-  "name": "Prototypal Dev Tool",
-  "description": "Tool for changing your component styling.",
+  "name": "Elemental Theme Editor",
+  "description": "Devtool for configuring your theme.",
   "version": "0.0.1",
   "permissions": [
     "<all_urls>",
