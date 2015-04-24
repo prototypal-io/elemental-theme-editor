@@ -14,10 +14,21 @@ module.exports = function(environment) {
     },
 
     APP: {
+      adapter: (process.env.EMBER_DIST || 'basic')
       // Here you can pass flags/options to your application instance
       // when it is created
     }
   };
+
+  ENV.contentSecurityPolicy = {
+    'default-src': "'none'",
+    'script-src': "* 'unsafe-eval'",
+    'font-src': "'self'",
+    'connect-src': "*",
+    'img-src': "'self'",
+    'style-src': "'self'",
+    'media-src': "'self'"
+  }
 
   if (environment === 'development') {
     // ENV.APP.LOG_RESOLVER = true;

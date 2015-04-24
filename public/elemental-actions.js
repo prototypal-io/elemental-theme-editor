@@ -3,5 +3,6 @@ window.Elemental = {
     var links = $('link');
     links.remove()
     links.appendTo('head');
+    console.log('reloaded css!');
   }
 };

@@ -3,21 +3,12 @@ import Ember from 'ember';
 export default Ember.Component.extend({
   init: function() {
     this._super(...arguments);
-    this._loadElementalActions();
     Ember.$.getJSON('http://localhost:4200/theme').then(json => {
       this.setProperties(json);
     });
   },
 
-  _loadElementalActions() {
-    // let xhr = new XMLHttpRequest();
-    // xhr.open("GET", chrome.extension.getURL('/elemental-actions.js'), false);
-    // xhr.send();
-    // let elementalActions = xhr.responseText;
-
-    // chrome.devtools.inspectedWindow.eval(elementalActions);
-  },
-
+  adapter: Ember.inject.service(),
   fontFamily: null,
   scale: null,
   color: null,
@@ -36,7 +27,7 @@ export default Ember.Component.extend({
         contentType: 'application/json',
         data: JSON.stringify(data)
       }).then(json => {
-        chrome.devtools.inspectedWindow.eval("Elemental.reloadCSS();");
+        this.get('adapter').reloadCSS();
       }, xhr => {
         console.log('failure');
       });
