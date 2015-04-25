@@ -1,22 +1,27 @@
-<button {{action 'reload'}}>reload</button>
+<form class="form" {{action "edit" on="submit"}}>
 
-<form {{action 'edit' on='submit'}}>
-  <label>
-    Font Family
-    {{input type='text' value=fontFamily}}
-  </label>
+  <div class="fieldset">
+    <label class="label" for="fontFamily">
+      Font Family
+    </label>
+      {{input name="fontFamily" class="input input--font-family" type="text" value=fontFamily}}
+  </div>
 
-  <br>
+  <div class="fieldset">
+    <label class="label" for="scale">
+      Scale
+    </label>
+    {{input name="scale" class="input" type="number" value=scale}}
+  </div>
 
-  <label>
-    Scale
-    {{input type='text' value=scale}}
-  </label>
+  <div class="fieldset">
+    <label class="label" for="color">
+      Color
+    </label>
+    {{input name="color" class="input" type="text" value=color}}
+    {{input name="color" class="input--color" type="color" value=color }}
+  </div>
 
-  <label>
-    Color
-    {{input type='text' value=color}}
-  </label>
-
-  <button {{action 'edit'}}>Save theme</button>
+  <button class="btn" {{action "edit"}}>SAVE THEME</button>
 </form>
+
