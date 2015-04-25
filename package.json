@@ -33,6 +33,9 @@
     "ember-component-css": "0.1.1",
     "ember-data": "1.0.0-beta.16.1",
     "ember-export-application-global": "^1.0.2",
-    "ember-routable-components": "0.0.2"
+    "ember-routable-components": "0.0.2",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-uglify": "^0.9.1"
   }
 }

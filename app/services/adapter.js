@@ -1,3 +1,4 @@
+/* globals Elemental */
 import Ember from 'ember';
 // import ChromeAdapter from '../adapters/chrome';
 // import config from '../config/environment';
@@ -14,18 +15,20 @@ export default Ember.Service.extend({
     if (resolved) {
       this._evalReloadCSS();
     } else {
-      this._loadingPromise.then(e => {
-        resolved = true
-        this._evalReloadCSS();
+      this._loadingPromise.then(() => {
+        resolved = true;
+        this._callReloadCSS();
       }, e => {
         console.warn(e);
       });
     }
   },
 
-  _evalReloadCSS() {
+  _callReloadCSS() {
     if (chrome && chrome.devtools) {
       chrome.devtools.inspectedWindow.eval("Elemental.reloadCSS();");
+    } else if (window.opener) {
+      window.opener.postMessage('reloadCSS', '*');
     } else {
       Elemental.reloadCSS();
     }
@@ -55,7 +58,8 @@ export default Ember.Service.extend({
 
       xhr.onerror = e => {
         reject(e);
-      }
+      };
+
       xhr.send();
     });
   }
