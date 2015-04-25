@@ -53,15 +53,22 @@ input[type="color" i]::-webkit-color-swatch {
   font-weight: 100;
   letter-spacing: 0.1rem;
   color: black;
-  border: 1px solid #DDD;
+  border: 1px solid #CCC;
   border-bottom-width: 3px;
   background: transparent;
 }
 
+.btn-action {
+  border-color: #AAA;
+  background: #FF4316;
+}
+
 .btn:hover {
-  border-color: #CCC;
+  border-color: #AAA;
 }
 
 .btn:active {
+  padding-top: calc(1rem + 2px);
+  border-top-width: 3px;
   border-bottom-width: 1px;
 }
