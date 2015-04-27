@@ -4,40 +4,66 @@ import Ember from 'ember';
 // import config from '../config/environment';
 
 export default Ember.Service.extend({
-
   init() {
     this._super(...arguments);
-    this._loadingPromise = this._loadElementalActions();
+    this._router = this.container.lookup('router:main');
+    this._tabId = chrome.devtools.inspectedWindow.tabId;
+    this._backgroundPageSetup();
+    this._loadingActionsPromise = this._loadElementalActions();
   },
 
-  reloadCSS() {
-    let resolved;
-    if (resolved) {
-      this._evalReloadCSS();
-    } else {
-      this._loadingPromise.then(() => {
-        resolved = true;
-        this._callReloadCSS();
-      }, e => {
-        console.warn(e);
+  _backgroundPageSetup() {
+    var backgroundPageConnection = chrome.runtime.connect({
+      name: 'elemental-pane'
+    });
+
+    backgroundPageConnection.postMessage({
+      name: 'init',
+      tabId: chrome.devtools.inspectedWindow.tabId
+    });
+
+    backgroundPageConnection.onMessage.addListener(message => {
+      let componentName = message.data;
+      this._router.transitionTo('component', componentName);
+    });
+  },
+
+  callAction(action) {
+    this._loadingActionsPromise.then(() => {
+      this._call(action);
+    }, e => {
+      console.warn(e);
+    });
+  },
+
+  _call(action) {
+    if (chrome && chrome.extension) {
+      chrome.extension.sendMessage({
+        from: 'devtools',
+        action: action,
+        tabId: this._tabId
       });
+    } else if (window.opener) {
+      window.opener.postMessage(action, '*');
     }
   },
 
-  _callReloadCSS() {
-    if (chrome && chrome.devtools) {
-      chrome.devtools.inspectedWindow.eval("Elemental.reloadCSS();");
-    } else if (window.opener) {
-      window.opener.postMessage('reloadCSS', '*');
-    } else {
-      Elemental.reloadCSS();
-    }
+  _loadElementalStyles() {
+    return this._loadAsset('styles');
   },
 
   _loadElementalActions() {
+    return this._loadAsset('actions');
+  },
+
+  _loadAsset(asset) {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest();
       let url;
+
+      // if bookmarklet, immediately exit because shit's already loaded
+      if (window.opener) { resolve(); return; }
+
       if (chrome && chrome.extension) {
         url = chrome.extension.getURL('/elemental-actions.js');
       } else {
@@ -46,13 +72,20 @@ export default Ember.Service.extend({
 
       xhr.open("GET", url , true);
       xhr.onload = e => {
-        let elementalActions = xhr.responseText;
+        let elementalAsset = xhr.responseText;
         if (chrome && chrome.devtools) {
-          chrome.devtools.inspectedWindow.eval(elementalActions);
-
+          chrome.devtools.inspectedWindow.eval(elementalAsset);
         } else {
-          eval(elementalActions);
+          eval(elementalAsset);
         }
+
+        // if (window.opener) {
+        //   window.opener.postMessage('setUpChannel', '*', [channel.port2]);
+        // } else {
+        //   // debugger;
+        //   this._call('setUpChannel', {  });
+        // }
+
         resolve(e);
       };
 

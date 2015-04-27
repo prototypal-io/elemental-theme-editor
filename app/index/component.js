@@ -3,6 +3,7 @@ import Ember from 'ember';
 export default Ember.Component.extend({
   init: function() {
     this._super(...arguments);
+    let adapter = this.get('adapter'); // instantiate this immediately
     Ember.$.getJSON('http://localhost:4200/theme').then(json => {
       this.setProperties(json);
     });
@@ -27,10 +28,14 @@ export default Ember.Component.extend({
         contentType: 'application/json',
         data: JSON.stringify(data)
       }).then(json => {
-        this.get('adapter').reloadCSS();
+        this.get('adapter').callAction('reloadCSS');
       }, xhr => {
         console.log('failure');
       });
+    },
+
+    inspect() {
+      this.get('adapter').callAction('inspect');
     }
   }
 });

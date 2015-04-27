@@ -26,7 +26,7 @@ module.exports = function(environment) {
     'font-src': "'self'",
     'connect-src': "*",
     'img-src': "'self'",
-    'style-src': "'self'",
+    'style-src': "*",
     'media-src': "'self'"
   }
 
