@@ -7,9 +7,11 @@ export default Ember.Service.extend({
   init() {
     this._super(...arguments);
     this._router = this.container.lookup('router:main');
-    this._tabId = chrome.devtools.inspectedWindow.tabId;
     this._backgroundPageSetup();
     this._loadingActionsPromise = this._loadElementalActions();
+    if (chrome && chrome.devtools) {
+      this._tabId = chrome.devtools.inspectedWindow.tabId;
+    }
   },
 
   _backgroundPageSetup() {
