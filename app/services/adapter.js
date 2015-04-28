@@ -8,7 +8,7 @@ export default Ember.Service.extend({
     this._super(...arguments);
     this._router = this.container.lookup('router:main');
     this._loadingActionsPromise = this._loadElementalActions();
-    if (chrome && chrome.devtools) {
+    if (this._isChrome && chrome.devtools) {
       this._backgroundPageSetup();
       this._tabId = chrome.devtools.inspectedWindow.tabId;
     } else {
@@ -18,6 +18,8 @@ export default Ember.Service.extend({
       }, false);
     }
   },
+
+  _isChrome: typeof chrome !== "undefined",
 
   _backgroundPageSetup() {
     var backgroundPageConnection = chrome.runtime.connect({
@@ -46,7 +48,7 @@ export default Ember.Service.extend({
   },
 
   _call(action) {
-    if (chrome && chrome.extension) {
+    if (this._isChrome && chrome.extension) {
       chrome.extension.sendMessage({
         from: 'devtools',
         action: action,
