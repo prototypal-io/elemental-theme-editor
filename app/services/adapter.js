@@ -80,7 +80,7 @@ export default Ember.Service.extend({
       xhr.onload = e => {
         let contents = xhr.responseText;
         let evalFn = this._isChrome() ? chrome.devtools.inspectedWindow.eval : eval;
-        evalFn(contents);
+        evalFn(contents + '//@ sourceURL=elemental-actions.js');
         resolve(e);
       };
 

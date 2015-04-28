@@ -93,7 +93,16 @@
       this.postMessage(componentName);
     },
 
+    bindActions: function() {
+      var actions = this.actions;
+      for (var key in actions) {
+        if (!actions.hasOwnProperty(key)) { continue; }
+        actions[key] = actions[key].bind(this);
+      }
+    },
+
     init: function() {
+      this.bindActions();
       this.highlightComponents = this.highlightComponents.bind(this);
       this.selectComponent     = this.selectComponent.bind(this);
       this._loadCSS();
