@@ -5,104 +5,105 @@
 // _styles property set on window through eval before this file is run
 // 2.) bookmarklet:
 // elemental-styles.css + this file are appended
+(function(global) {
+  global.Elemental = {
+    _inspecting: false,
 
-window.Elemental = {
-  // a _port property (MessageChannel port) is set on
-  // this object to communicate with the extension
-  postMessage: function(message) {
-    if (window._openedWindow) {
-      window._openedWindow.postMessage(message, '*');
-    } else if (this._port) {
-      this._port.postMessage(message);
-    }
-  },
-
-  _loadCSS: function() {
-    console.log('loaded css');
-    $('head').append('<style>' + '.elemental-inspected { border-style: dotted; border-width: 1px; }' + '</style>');
-  },
-
-  _connectToContentScript: function() {
-    var channel = new MessageChannel();
-    this._port = channel.port1;
-    window.postMessage('elemental-actions-setup', '*', [channel.port2]);
-
-    this._port.onmessage = function(event) {
-      var action = event.data;
-      if (Elemental[action]) {
-        Elemental[action]();
+    // a _port property (MessageChannel port) is set on
+    // this object to communicate with the extension
+    postMessage: function(message) {
+      if (global._openedWindow) {
+        global._openedWindow.postMessage(message, '*');
+      } else if (this._port) {
+        this._port.postMessage(message);
       }
-    };
-  },
+    },
 
-  reloadCSS: function() {
-    var links = $('link');
-    links.remove()
-    links.appendTo('head');
-    console.log('reloaded css!');
-  },
+    _loadCSS: function() {
+      console.log('loaded css');
+      $('head').append('<style> .elemental-inspected { border-style: dotted; border-width: 1px; } </style>');
+    },
 
-  _inspecting: false,
+    _connectToContentScript: function() {
+      var channel = new MessageChannel();
+      this._port = channel.port1;
+      global.postMessage('elemental-actions-setup', '*', [channel.port2]);
 
-  inspect: function() {
-    if (this._inspecting) {
-      console.log('inspecting turned off!');
-      this._inspecting = false;
-      document.removeEventListener('mouseover', this.highlightComponents, false);
-      document.removeEventListener('click', this.selectComponent, false);
-    } else {
-      console.log('inspecting!');
-      this._inspecting = true;
-      document.addEventListener('mouseover', this.highlightComponents, false);
-      document.addEventListener('click', this.selectComponent, false);
-    }
-  },
+      this._port.onmessage = function(event) {
+        var action = event.data;
+        Elemental.send(action);
+      };
+    },
 
-  determineTarget: function(e) {
-    var $targetArray = $(e.target);
-    var $target = $targetArray[0];
-    var emberId
+    send: function(actionName) {
+      if (this.actions[actionName]) {
+        this.actions[actionName]();
+      }
+    },
 
-    if ($targetArray.hasClass('ember-view')) {
-      emberId = $target.id
-    } else if ($targetArray.parents('.ember-view').length > 0) {
-      $target = $targetArray.parents('.ember-view')[0];
-      emberId = $target.id;
-    }
+    actions: {
+      reloadCSS: function() {
+        var links = $('link');
+        links.remove();
+        links.appendTo('head');
+        console.log('reloaded css!');
+      },
 
-    return { $target: $target, emberId: emberId }
-  },
+      inspect: function() {
+        if (this._inspecting) {
+          console.log('inspecting turned off!');
+          this._inspecting = false;
+          document.removeEventListener('mouseover', this.highlightComponents, false);
+          document.removeEventListener('click', this.selectComponent, false);
+        } else {
+          console.log('inspecting!');
+          this._inspecting = true;
+          document.addEventListener('mouseover', this.highlightComponents, false);
+          document.addEventListener('click', this.selectComponent, false);
+        }
+      }
+    },
 
-  // determine if ember component and apply highlight class if true
-  highlightComponents: function(e) {
-    var component
-    var targetInfo = Elemental.determineTarget(e);
-    var emberId = targetInfo.emberId;
-    var $target = targetInfo.$target;
+    findComponentForEvent: function(e) {
+      var current = e.target;
 
+      while (current) {
+        if (isComponent(current)) { break; }
+        current = current.parentElement;
+      }
 
-    $(document).find("*").removeClass("elemental-inspected");
+      return current;
+    },
 
-    if (emberId && Em.View.views[emberId] instanceof Ember.Component) {
-      $target.classList.add("elemental-inspected");
-    }
-  },
+    // determine if ember component and apply highlight class if true
+    highlightComponents: function(e) {
+      $(".elemental-inspected").removeClass("elemental-inspected");
+      var componentEl = this.findComponentForEvent(e);
+      if (!componentEl) { return; }
+      componentEl.classList.add("elemental-inspected");
+    },
 
-  // determine if ember component and send message w/ component if true
-  selectComponent: function(e) {
-    var targetInfo = Elemental.determineTarget(e);
-    var emberId = targetInfo.emberId;
-    var $target = targetInfo.$target;
-
-    if (emberId && Em.View.views[emberId] instanceof Ember.Component) {
-      component = Em.View.views[emberId]._debugContainerKey.replace('component:', '');
+    // determine if ember component and send message w/ component if true
+    selectComponent: function(e) {
+      var componentEl = this.findComponentForEvent(e);
+      if (!componentEl) { return; }
+      var component = Ember.View.views[componentEl.id];
+      var componentName = component._debugContainerKey.replace('component:', '');
       console.log('COMPONENT CLICKED - SENDING ACTION TO DEVTOOLS!');
-      Elemental.postMessage(component);
+      this.postMessage(componentName);
+    },
+
+    init: function() {
+      this.highlightComponents = this.highlightComponents.bind(this);
+      this.selectComponent     = this.selectComponent.bind(this);
+      this._loadCSS();
+      this._connectToContentScript();
     }
+  };
+
+  function isComponent(el) {
+    return el.className.indexOf('ember-view') !== -1;
   }
-};
 
-
-
-Elemental._loadCSS();
-Elemental._connectToContentScript();
+  Elemental.init();
+})(window);

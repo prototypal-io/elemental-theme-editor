@@ -1,6 +1,11 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  adapter: Ember.inject.service(),
+  fontFamily: null,
+  scale: null,
+  color: null,
+
   init: function() {
     this._super(...arguments);
     let adapter = this.get('adapter'); // instantiate this immediately
@@ -8,11 +13,6 @@ export default Ember.Component.extend({
       this.setProperties(json);
     });
   },
-
-  adapter: Ember.inject.service(),
-  fontFamily: null,
-  scale: null,
-  color: null,
 
   actions: {
     reload() {

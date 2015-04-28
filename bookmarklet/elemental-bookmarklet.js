@@ -20,23 +20,22 @@
 // document.head.appendChild(link);
 
 (function() {
+  // TODO: you should be able to serve this from the ember-cli addon via express? or use a known URL
   var url = 'http://localhost:5555';
-  var themeEditorWindow = window.open(url, "DescriptiveWindowName", "width=550,height=400,scrollbars=yes,status=1");
+  var themeEditorWindow = window.open(url, "elemental-theme-editor", "width=550,height=400,scrollbars=yes,status=1");
 
   var script = document.createElement('script');
   script.src = url + '/elemental-actions.js';
 
   document.body.appendChild(script);
-  
+
   window._openedWindow = themeEditorWindow;
 
   window.addEventListener('message', receiveMessage, false);
 
   function receiveMessage(event) {
     var action = event.data;
-
-    if (window.Elemental && window.Elemental[action]) {
-      Elemental[action]();
-    }
+    var Elemental = window.Elemental;
+    if (Elemental) { Elemental.send(action); }
   }
 })();

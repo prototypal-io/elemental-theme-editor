@@ -4,38 +4,47 @@ import Ember from 'ember';
 // import config from '../config/environment';
 
 export default Ember.Service.extend({
+  _tabId: null,
+
   init() {
     this._super(...arguments);
-    this._router = this.container.lookup('router:main');
+    this.router = this.container.lookup('router:main');
     this._loadingActionsPromise = this._loadElementalActions();
-    if (this._isChrome && chrome.devtools) {
-      this._backgroundPageSetup();
-      this._tabId = chrome.devtools.inspectedWindow.tabId;
+    if (this._isChrome()) {
+      this._setupChrome();
     } else {
       window.addEventListener('message', event => {
         let componentName = event.data;
-        this._router.transitionTo('component', componentName);
+        this.router.transitionTo('component', componentName);
       }, false);
     }
   },
 
-  _isChrome: typeof chrome !== "undefined",
+  _isChrome() {
+    return typeof chrome !== "undefined";
+  },
 
-  _backgroundPageSetup() {
-    var backgroundPageConnection = chrome.runtime.connect({
+  _setupChrome() {
+    let devtools = chrome.devtools;
+    let runtime  = chrome.runtime;
+
+    if (!devtools || !runtime) { return; }
+
+    let tabId = this._tabId = devtools.inspectedWindow.tabId;
+    let backgroundPageConnection = runtime.connect({
       name: 'elemental-pane'
     });
 
     backgroundPageConnection.postMessage({
       name: 'init',
-      tabId: chrome.devtools.inspectedWindow.tabId
+      tabId: tabId
     });
 
     // the message data might become more complex, but for now it's just
     // the name of a component that a user clicked in magnification mode
     backgroundPageConnection.onMessage.addListener(message => {
       let componentName = message.data;
-      this._router.transitionTo('component', componentName);
+      this.router.transitionTo('component', componentName);
     });
   },
 
@@ -48,55 +57,30 @@ export default Ember.Service.extend({
   },
 
   _call(action) {
-    if (this._isChrome && chrome.extension) {
-      chrome.extension.sendMessage({
-        from: 'devtools',
-        action: action,
-        tabId: this._tabId
-      });
+    if (this._isChrome()) {
+      chrome.extension.sendMessage({from: 'devtools', action: action, tabId: this._tabId});
     } else if (window.opener) {
       window.opener.postMessage(action, '*');
     }
   },
 
-  _loadElementalStyles() {
-    return this._loadAsset('styles');
-  },
-
   _loadElementalActions() {
-    return this._loadAsset('actions');
-  },
-
-  _loadAsset(asset) {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest();
-      let url;
 
       // if bookmarklet, immediately exit because shit's already loaded
       if (window.opener) { resolve(); return; }
 
-      if (chrome && chrome.extension) {
-        url = chrome.extension.getURL('/elemental-actions.js');
-      } else {
-        url = '/elemental-actions.js';
+      let url = '/elemental-actions.js';
+      if (this._isChrome()) {
+        url = chrome.extension.getURL(url);
       }
 
-      xhr.open("GET", url , true);
+      xhr.open("GET", url, true);
       xhr.onload = e => {
-        let elementalAsset = xhr.responseText;
-        if (chrome && chrome.devtools) {
-          chrome.devtools.inspectedWindow.eval(elementalAsset);
-        } else {
-          eval(elementalAsset);
-        }
-
-        // if (window.opener) {
-        //   window.opener.postMessage('setUpChannel', '*', [channel.port2]);
-        // } else {
-        //   // debugger;
-        //   this._call('setUpChannel', {  });
-        // }
-
+        let contents = xhr.responseText;
+        let evalFn = this._isChrome() ? chrome.devtools.inspectedWindow.eval : eval;
+        evalFn(contents);
         resolve(e);
       };
 
@@ -107,11 +91,4 @@ export default Ember.Service.extend({
       xhr.send();
     });
   }
-
-  // _adapter() {
-    // let adapterName = config.default.APP.adapter;
-    // let adapterName = 'chrome';
-    // return this.container.lookup(`adapter:${adapterName}`) || this.container.lookup(`adapter:basic`);
-  // }
-
 });

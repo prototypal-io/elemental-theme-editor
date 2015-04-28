@@ -1,14 +1,9 @@
-(function() {
-  // not sure how this differs from chrome.runtime
-  // chrome.extension.onConnect.addListener(function(port) {
-  //   debugger;
-  // });
-
+(function(global) {
   var connections = {};
 
   chrome.runtime.onConnect.addListener(function (port) {
 
-    var extensionListener = function (message, sender, sendResponse) {
+    function extensionListener(message, sender, sendResponse) {
       // The original connection event doesn't include the tab ID of the
       // DevTools page, so we need to send it explicitly.
       if (message.name == "init") {
@@ -19,7 +14,6 @@
     	// other message handling
     }
 
-
     // Listen to messages sent from the DevTools page
     port.onMessage.addListener(extensionListener);
 
@@ -27,9 +21,10 @@
       port.onMessage.removeListener(extensionListener);
 
       var tabs = Object.keys(connections);
-      for (var i=0, len=tabs.length; i < len; i++) {
-        if (connections[tabs[i]] == port) {
-          delete connections[tabs[i]]
+      for (var i = 0, l = tabs.length; i < l; i++) {
+        var tabId = tabs[i];
+        if (connections[tabId] === port) {
+          connections[tabId] = undefined;
           break;
         }
       }
@@ -58,10 +53,4 @@
     }
     return true;
   });
-
-
-  chrome.tabs.onUpdated.addListener(function(tabId){
-    // DONT KNOW WHY YOU WOULD NEED THIS
-  });
-
-})();
+})(window);
