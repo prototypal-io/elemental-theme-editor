@@ -10,7 +10,11 @@ window.Elemental = {
   // a _port property (MessageChannel port) is set on
   // this object to communicate with the extension
   postMessage: function(message) {
-    this._port.postMessage(message);
+    if (window._openedWindow) {
+      window._openedWindow.postMessage(message, '*');
+    } else if (this._port) {
+      this._port.postMessage(message);
+    }
   },
 
   _loadCSS: function() {
@@ -38,37 +42,20 @@ window.Elemental = {
     console.log('reloaded css!');
   },
 
+  _inspecting: false,
+
   inspect: function() {
-    var self = this;
-    console.log('inspecting!');
-
-    // determine if ember component and apply highlight class if true
-    document.addEventListener('mouseover', function(e) {
-      var component
-      var targetInfo = self.determineTarget(e);
-      var emberId = targetInfo.emberId;
-      var $target = targetInfo.$target;
-
-      $(document).find("*").removeClass("elemental-inspected");
-
-      if (emberId && Em.View.views[emberId] instanceof Ember.Component) {
-        $target.classList.add("elemental-inspected");
-      }
-    });
-
-
-    // determine if ember component and send message w/ component if true
-    document.addEventListener('click', function(e) {
-      var targetInfo = self.determineTarget(e);
-      var emberId = targetInfo.emberId;
-      var $target = targetInfo.$target;
-
-      if (emberId && Em.View.views[emberId] instanceof Ember.Component) {
-        component = Em.View.views[emberId]._debugContainerKey.replace('component:', '');
-        console.log('COMPONENT CLICKED - SENDING ACTION TO DEVTOOLS!');
-        self._port.postMessage(component);
-      }
-    });
+    if (this._inspecting) {
+      console.log('inspecting turned off!');
+      this._inspecting = false;
+      document.removeEventListener('mouseover', this.highlightComponents, false);
+      document.removeEventListener('click', this.selectComponent, false);
+    } else {
+      console.log('inspecting!');
+      this._inspecting = true;
+      document.addEventListener('mouseover', this.highlightComponents, false);
+      document.addEventListener('click', this.selectComponent, false);
+    }
   },
 
   determineTarget: function(e) {
@@ -84,8 +71,38 @@ window.Elemental = {
     }
 
     return { $target: $target, emberId: emberId }
+  },
+
+  // determine if ember component and apply highlight class if true
+  highlightComponents: function(e) {
+    var component
+    var targetInfo = Elemental.determineTarget(e);
+    var emberId = targetInfo.emberId;
+    var $target = targetInfo.$target;
+
+
+    $(document).find("*").removeClass("elemental-inspected");
+
+    if (emberId && Em.View.views[emberId] instanceof Ember.Component) {
+      $target.classList.add("elemental-inspected");
+    }
+  },
+
+  // determine if ember component and send message w/ component if true
+  selectComponent: function(e) {
+    var targetInfo = Elemental.determineTarget(e);
+    var emberId = targetInfo.emberId;
+    var $target = targetInfo.$target;
+
+    if (emberId && Em.View.views[emberId] instanceof Ember.Component) {
+      component = Em.View.views[emberId]._debugContainerKey.replace('component:', '');
+      console.log('COMPONENT CLICKED - SENDING ACTION TO DEVTOOLS!');
+      Elemental.postMessage(component);
+    }
   }
 };
+
+
 
 Elemental._loadCSS();
 Elemental._connectToContentScript();

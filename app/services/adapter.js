@@ -7,10 +7,15 @@ export default Ember.Service.extend({
   init() {
     this._super(...arguments);
     this._router = this.container.lookup('router:main');
-    this._backgroundPageSetup();
     this._loadingActionsPromise = this._loadElementalActions();
     if (chrome && chrome.devtools) {
+      this._backgroundPageSetup();
       this._tabId = chrome.devtools.inspectedWindow.tabId;
+    } else {
+      window.addEventListener('message', event => {
+        let componentName = event.data;
+        this._router.transitionTo('component', componentName);
+      }, false);
     }
   },
 
@@ -24,6 +29,8 @@ export default Ember.Service.extend({
       tabId: chrome.devtools.inspectedWindow.tabId
     });
 
+    // the message data might become more complex, but for now it's just
+    // the name of a component that a user clicked in magnification mode
     backgroundPageConnection.onMessage.addListener(message => {
       let componentName = message.data;
       this._router.transitionTo('component', componentName);
