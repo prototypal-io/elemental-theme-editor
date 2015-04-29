@@ -1,5 +1,44 @@
-<h1>SETTINGS FOR {{model}}</h1>
+<nav>
+  {{#link-to 'index'}}Home{{/link-to}}
+</nav>
 
-{{#link-to 'index'}}Home{{/link-to}}
+<div class="container">
+  <h1>Settings for {{model}}</h1>
+
+  <form class="form" {{action "edit" on="submit"}}>
+
+    <div class="fieldset">
+      <label class="label" for="margin">
+        Margin
+      </label>
+      {{input name="margin" class="input" type="text" value=margin}}
+    </div>
+
+    <div class="fieldset">
+      <label class="label" for="padding">
+        Padding
+      </label>
+      {{input name="padding" class="input" type="text" value=padding}}
+    </div>
+
+    <div class="fieldset">
+      <label class="label" for="color">
+        Color
+      </label>
+      {{input name="color" class="input" type="text" value=color }}
+      {{input name="color" class="input--color" type="color" value=color }}
+    </div>
+
+    <div class="fieldset">
+      <label class="label" for="backgroundColor">
+        Background Color
+      </label>
+      {{input name="backgroundColor" class="input" type="text" value=backgroundColor }}
+      {{input name="backgroundColor" class="input--color" type="color" value=backgroundColor }}
+    </div>
+
+    <button class="btn" {{action "save"}}>Save Settings for {{model}}</button>
+  </form>
+</div>
 
 {{outlet}}
