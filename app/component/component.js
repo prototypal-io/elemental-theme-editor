@@ -1,10 +1,14 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  _themeJSON: null,
+  adapter: Ember.inject.service(),
+
   init: function() {
     this._super(...arguments);
     Ember.$.getJSON('http://localhost:4200/theme').then(themeJSON => {
       // this component is expecting the component's properties to be in theme.json
+      this._themeJSON = themeJSON;
       this.setProperties(themeJSON[this.get('model')]);
 
       // this.set('settings', themeJSON[this.get('model')]);
@@ -19,12 +23,15 @@ export default Ember.Component.extend({
 
   actions: {
     save() {
-      themeJSON[this.get('model')] = this.getProperties();
+      let componentName = this.get('model');
+      let componentProps = Object.keys(this._themeJSON[componentName])
+
+      this._themeJSON[componentName] = this.getProperties(componentProps);
 
       Ember.$.ajax('http://localhost:4200/theme', {
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(themeJSON)
+        data: JSON.stringify(this._themeJSON)
       }).then(json => {
         this.get('adapter').callAction('reloadCSS');
       }, xhr => {

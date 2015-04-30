@@ -1,6 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  _themeJSON: null,
   adapter: Ember.inject.service(),
   fontFamily: null,
   scale: null,
@@ -10,6 +11,7 @@ export default Ember.Component.extend({
     this._super(...arguments);
     let adapter = this.get('adapter'); // instantiate this immediately
     Ember.$.getJSON('http://localhost:4200/theme').then(themeJSON => {
+      this._themeJSON = themeJSON;
       this.setProperties(themeJSON.globals);
     });
   },
@@ -21,13 +23,12 @@ export default Ember.Component.extend({
 
     save() {
       console.log('saving settings!');
-      let themeJSON = {};
-      themeJSON.globals = this.getProperties('fontFamily', 'scale', 'color');
+      this._themeJSON.globals = this.getProperties('fontFamily', 'scale', 'color');
 
       Ember.$.ajax('http://localhost:4200/theme', {
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(themeJSON)
+        data: JSON.stringify(this._themeJSON)
       }).then(json => {
         this.get('adapter').callAction('reloadCSS');
       }, xhr => {
