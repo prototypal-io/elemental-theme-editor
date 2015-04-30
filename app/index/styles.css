@@ -1,8 +1,27 @@
+
+.icon__btn {
+  border: none;
+  background: none;
+}
+
+.icon__btn > .iconic {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon__btn > .iconic * {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.btn-bar > .icon__btn {
+  padding-top: 0.25rem;
+  margin-right: 0.5rem;
+}
+
 .form {
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
-  max-width: 30rem;
   font-weight: 100;
   line-height: 3;
   background: white;
@@ -84,3 +103,4 @@ input[type="color" i]::-webkit-color-swatch {
   border-top-width: 3px;
   border-bottom-width: 1px;
 }
+

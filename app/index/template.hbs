@@ -1,10 +1,17 @@
 
-<button {{action 'reload'}}>RELOAD</button>
-
-<button {{action 'inspect'}}>MAGNIFYING GLASS GOES HERE</button>
-
-
 <form class="form" {{action "edit" on="submit"}}>
+
+  <section class="form__header">
+    <nav class="btn-bar">
+      <button class="icon__btn" {{action 'inspect'}}>
+        <img class="iconic" data-src="icons/target.svg">
+      </button>
+
+      <button class="icon__btn" {{action 'reload'}}>
+        <img class="iconic" data-src="icons/loop-circular.svg">
+      </button>
+    </nav>
+  </section>
 
   <section class="form__section">
     <h1 class="form__header">THEME</h1>
@@ -45,3 +52,4 @@
   <button class="btn" {{action "save"}}>SAVE THEME</button>
 
 </form>
+
