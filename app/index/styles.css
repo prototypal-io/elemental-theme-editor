@@ -1,7 +1,20 @@
 .form {
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
+  max-width: 30rem;
   font-weight: 100;
+  line-height: 3;
+  background: white;
+}
+
+.form__header {
+  font-size: inherit;
+  font-weight: 100;
+  line-height: 1.5;
+  padding-left: 1rem;
+  background-color: #DDD;
+  border-bottom: 1px solid #BFBFBF;
 }
 
 .fieldset {
@@ -12,7 +25,6 @@
 
 .label {
   margin-left: 1rem;
-  line-height: 3;
   white-space: nowrap;
 }
 

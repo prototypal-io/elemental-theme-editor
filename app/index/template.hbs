@@ -6,27 +6,34 @@
 
 <form class="form" {{action "edit" on="submit"}}>
 
-  <div class="fieldset">
-    <label class="label" for="fontFamily">
-      Font Family
-    </label>
-    {{input name="fontFamily" class="input input--font-family" type="text" value=fontFamily}}
-  </div>
+  <section class="form__section">
+    <h1 class="form__header">THEME</h1>
+    <div class="fieldset">
+      <label class="label" for="fontFamily">
+        Font Family
+      </label>
+        {{input name="fontFamily" class="input input--font-family" type="text" value=fontFamily}}
+    </div>
 
-  <div class="fieldset">
-    <label class="label" for="scale">
-      Scale
-    </label>
-    {{input name="scale" class="input" type="number" value=scale}}
-  </div>
+    <div class="fieldset">
+      <label class="label" for="scale">
+        Scale
+      </label>
+      {{input name="scale" class="input" type="number" value=scale}}
+    </div>
 
-  <div class="fieldset">
-    <label class="label" for="color">
-      Color
-    </label>
-    {{input name="color" class="input" type="text" value=color}}
-    {{input name="color" class="input--color" type="color" value=color }}
-  </div>
+    <div class="fieldset">
+      <label class="label" for="color">
+        Color
+      </label>
+      {{input name="color" class="input" type="text" value=color}}
+      {{input name="color" class="input--color" type="color" value=color }}
+    </div>
+  </section>
+
+  <section class="form__section">
+    <h1 class="form__header">CUSTOM</h1>
+  </section>
 
   <div class="fieldset">
     <label class="label" for="surface">
@@ -36,4 +43,5 @@
   </div>
 
   <button class="btn" {{action "save"}}>SAVE THEME</button>
+
 </form>
