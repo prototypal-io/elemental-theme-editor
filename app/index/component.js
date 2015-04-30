@@ -6,6 +6,7 @@ export default Ember.Component.extend({
   fontFamily: null,
   scale: null,
   color: null,
+  surface: null,
 
   init: function() {
     this._super(...arguments);
@@ -23,7 +24,7 @@ export default Ember.Component.extend({
 
     save() {
       console.log('saving settings!');
-      this._themeJSON.globals = this.getProperties('fontFamily', 'scale', 'color');
+      this._themeJSON.globals = this.getProperties('fontFamily', 'scale', 'color', 'surface');
 
       Ember.$.ajax('http://localhost:4200/theme', {
         type: 'POST',
