@@ -11,7 +11,7 @@
     // Listens to messages coming directly from background script
     chrome.runtime.onMessage.addListener(function(message, sender) {
       if (message.from === 'devtools') {
-        port.postMessage(message.action);
+        port.postMessage(message);
       }
     });
 

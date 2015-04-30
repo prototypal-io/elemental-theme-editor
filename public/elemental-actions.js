@@ -21,7 +21,6 @@
 
     _loadCSS: function() {
       console.log('loaded css');
-      // $('head').append('<style> .elemental-inspected { border-style: dotted; border-width: 1px; } </style>');
     },
 
     _connectToContentScript: function() {
@@ -30,22 +29,40 @@
       global.postMessage('elemental-actions-setup', '*', [channel.port2]);
 
       this._port.onmessage = function(event) {
-        var action = event.data;
-        Elemental.send(action);
+        var message = event.data;
+        Elemental.send(message.action, message.data);
       };
     },
 
-    send: function(actionName) {
+    send: function(actionName, data) {
       if (this.actions[actionName]) {
-        this.actions[actionName]();
+        this.actions[actionName](data);
       }
     },
 
     actions: {
-      reloadCSS: function() {
+      reloadCSS: function(themeJson) {
         var links = $('link');
         links.remove();
         links.appendTo('head');
+
+        var style = document.createElement('style');
+        var fontFamily = "body {\nfont-family:"+ themeJson.globals.fontFamily + ";\n}";
+        var surfaceColor = ".surface-4, .surface-3, .surface-2, .surface-1, .surface--custom {\ncolor:" + themeJson.globals.color + ";\n}";
+        var lightSurface = ".surface-4 {\nborder: none !important;\nbackground-color: rgb(255, 255, 255);\nbox-shadow: 0rem 0.5rem 1rem grey;\n}\n.surface-3 {\nbackground-color: rgb(232, 232, 232);\nbox-shadow: 0rem 0.5rem 1rem grey;\n}\n.surface-2 {\nborder: none !important;\nbackground-color: rgb(212, 213, 213);\nbox-shadow: 0rem 0.25rem 0.5rem grey;\n}\n.surface-1 {\nbackground-color: rgb(196, 196, 196);\n}\n.surface--custom {\ncolor: rgb(255, 255, 255);\nbackground-color: rgb(0, 0, 0);\n}\n";
+        var darkSurface = ".surface-4 {\ncolor: rgb(255, 255, 255);\nborder: none !important;\nborder-radius: 2px;\nbackground-color: rgb(73, 73, 73);\nbox-shadow: 0rem 0.5rem 1.5rem rgba(0, 0, 0, 0.5), inset 0 0 0.1rem grey;\n}\n.surface-3 {\ncolor: rgb(255, 255, 255);\nbackground-color: rgb(59, 59, 59);\nbox-shadow: 0rem 0.25rem 0.5rem black;\n}\n.surface-2 {\ncolor: rgb(212, 213, 213);\nborder: none !important;\nbackground-color: rgb(42, 43, 43);\nbox-shadow: 0rem 0.1rem 0.15rem #000000;\nbox-shadow: 0rem 0.1rem 0.15rem rgba(0, 0, 0, 0.5);\n}\n.surface-1 {\ncolor: rgb(255, 255, 255);\nbackground-color: rgb(59, 59, 59);\n}\n.surface--custom {\ncolor: rgb(255, 255, 255);\nborder: none !important;\nbackground-color: rgb(0, 0, 0);\n}\n";
+        var output = "";
+
+        output += (fontFamily + surfaceColor);
+        if (themeJson.globals.surface === "true") {
+          output += lightSurface;
+        } else {
+          output += darkSurface;
+        }
+
+        style.innerHTML = output;
+        document.head.appendChild(style);
+
         console.log('reloaded css!');
       },
 

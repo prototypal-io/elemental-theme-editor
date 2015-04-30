@@ -48,18 +48,19 @@ export default Ember.Service.extend({
     });
   },
 
-  callAction(action) {
+  callAction(action, data) {
     this._loadingActionsPromise.then(() => {
-      this._call(action);
+      this._call(action, data);
     }, e => {
       console.warn(e);
     });
   },
 
-  _call(action) {
+  _call(action, data) {
     if (this._isChrome()) {
-      chrome.extension.sendMessage({from: 'devtools', action: action, tabId: this._tabId});
+      chrome.extension.sendMessage({from: 'devtools', action: action, tabId: this._tabId, data: data});
     } else if (window.opener) {
+      // need action + data
       window.opener.postMessage(action, '*');
     }
   },

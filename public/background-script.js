@@ -40,7 +40,7 @@
     // otherwise, the message is from a content script that needs to be send to
     // its respective devtools connection
     if (request.from === 'devtools') {
-      chrome.tabs.sendMessage(request.tabId, { from: request.from, action: request.action });
+      chrome.tabs.sendMessage(request.tabId, { from: request.from, action: request.action, data: request.data });
     } else if (sender.tab) {
       var tabId = sender.tab.id;
       if (tabId in connections) {

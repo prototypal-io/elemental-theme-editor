@@ -6,7 +6,7 @@ export default Ember.Component.extend({
   fontFamily: null,
   scale: null,
   color: null,
-  surface: null,
+  surface: false,
 
   init: function() {
     this._super(...arguments);
@@ -31,7 +31,7 @@ export default Ember.Component.extend({
         contentType: 'application/json',
         data: JSON.stringify(this._themeJSON)
       }).then(json => {
-        this.get('adapter').callAction('reloadCSS');
+        this.get('adapter').callAction('reloadCSS', json.theme);
       }, xhr => {
         console.log('failure');
       });
