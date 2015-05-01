@@ -9,12 +9,12 @@ export default Ember.Component.extend({
   color: null,
   surface: false,
   inspectActive: Ember.computed('_inspectActive', function() {
-    if (this._inspectActive) { return 'inspect-active' }
+    if (this._inspectActive) { return 'inspect-active'; }
   }),
 
   init: function() {
     this._super(...arguments);
-    let adapter = this.get('adapter'); // instantiate this immediately
+    this.get('adapter'); // instantiate this immediately
     Ember.$.getJSON('http://localhost:4200/theme').then(themeJSON => {
       this._themeJSON = themeJSON;
       this.setProperties(themeJSON.globals);
@@ -22,7 +22,7 @@ export default Ember.Component.extend({
   },
 
   didInsertElement() {
-    var iconic = IconicJS();
+    var iconic = new IconicJS();
     iconic.update();
   },
 
@@ -42,7 +42,8 @@ export default Ember.Component.extend({
       }).then(json => {
         this.get('adapter').callAction('reloadCSS', json.theme);
       }, xhr => {
-        console.log('failure');
+        console.warn('FAILURE:');
+        console.log(xhr);
       });
     },
 

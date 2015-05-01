@@ -22,14 +22,14 @@ export default Ember.Component.extend({
   },
 
   didInsertElement() {
-    let iconic = IconicJS();
+    let iconic = new IconicJS();
     iconic.update();
   },
 
   actions: {
     save() {
       let componentName = this.get('model');
-      let componentProps = Object.keys(this._themeJSON[componentName])
+      let componentProps = Object.keys(this._themeJSON[componentName]);
 
       this._themeJSON[componentName] = this.getProperties(componentProps);
 
@@ -37,10 +37,11 @@ export default Ember.Component.extend({
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(this._themeJSON)
-      }).then(json => {
+      }).then(() => {
         this.get('adapter').callAction('reloadCSS');
       }, xhr => {
-        console.log('failure');
+        console.warn('FAILURE:');
+        console.log(xhr);
       });
     }
   }

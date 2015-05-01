@@ -1,4 +1,3 @@
-/* globals Elemental */
 import Ember from 'ember';
 // import ChromeAdapter from '../adapters/chrome';
 // import config from '../config/environment';

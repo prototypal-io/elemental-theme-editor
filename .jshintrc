@@ -2,8 +2,10 @@
   "predef": [
     "document",
     "window",
-    "-Promise",
-    "chrome"
+    "-Promise", /* why the heck is there a dash in front of this? */
+    "Promise",
+    "chrome",
+    "IconicJS"
   ],
   "browser": true,
   "boss": true,
