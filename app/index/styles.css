@@ -103,4 +103,6 @@ input[type="color" i]::-webkit-color-swatch {
   border-top-width: 3px;
   border-bottom-width: 1px;
 }
-
+.checkbox {
+  align-self: flex-end;
+}
