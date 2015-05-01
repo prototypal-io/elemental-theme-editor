@@ -42,7 +42,10 @@
     <label class="label" for="surface">
       Surface Light
     </label>
-    {{input name="surface" type="checkbox" checked=surface}}
+    <div>
+    {{input class="toggle" name="surface" type="checkbox" checked=surface}}
+    <div class="checkbox__toggle"></div>
+    </div>
   </div>
 
   <button class="btn" {{action "save"}}>SAVE THEME</button>
