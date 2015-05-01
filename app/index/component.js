@@ -2,11 +2,15 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   _themeJSON: null,
+  _inspectActive: null,
   adapter: Ember.inject.service(),
   fontFamily: null,
   scale: null,
   color: null,
   surface: false,
+  inspectActive: Ember.computed('_inspectActive', function() {
+    if (this._inspectActive) { return 'inspect-active' }
+  }),
 
   init: function() {
     this._super(...arguments);
@@ -43,6 +47,7 @@ export default Ember.Component.extend({
     },
 
     inspect() {
+      this.toggleProperty('_inspectActive');
       this.get('adapter').callAction('inspect');
     }
   }

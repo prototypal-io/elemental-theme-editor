@@ -54,7 +54,7 @@
         var output = "";
 
         output += (fontFamily + surfaceColor);
-        if (themeJson.globals.surface === "true") {
+        if (themeJson.globals.surface === true) {
           output += lightSurface;
         } else {
           output += darkSurface;

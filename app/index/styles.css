@@ -19,6 +19,10 @@
   margin-right: 0.5rem;
 }
 
+.btn-bar > .inspect-active {
+  color: blue;
+}
+
 .form {
   display: flex;
   flex-direction: column;
