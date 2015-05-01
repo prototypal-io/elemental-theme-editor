@@ -21,6 +21,11 @@ export default Ember.Component.extend({
     });
   },
 
+  didInsertElement() {
+    let iconic = IconicJS();
+    iconic.update();
+  },
+
   actions: {
     save() {
       let componentName = this.get('model');

@@ -1,9 +1,13 @@
 <nav>
-  {{#link-to 'index'}}Home{{/link-to}}
+  {{#link-to 'index'}}
+    <button class="icon__btn">
+      <img class="iconic" data-src="icons/home.svg">
+    </button>
+  {{/link-to}}
 </nav>
 
 <div class="container">
-  <h1>Settings for {{model}}</h1>
+  <h1 class="form__header">Settings for {{model}}</h1>
 
   <form class="form" {{action "edit" on="submit"}}>
 

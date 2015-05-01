@@ -21,3 +21,108 @@ body {
   background: #EEE;
 }
 
+.icon__btn {
+  border: none;
+  background: none;
+}
+
+.icon__btn > .iconic {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon__btn > .iconic * {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.btn-bar > .icon__btn {
+  padding-top: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  font-weight: 100;
+  line-height: 3;
+  background: white;
+}
+
+.form__header {
+  font-size: inherit;
+  font-weight: 100;
+  line-height: 1.5;
+  padding-left: 1rem;
+  background-color: #DDD;
+  border-bottom: 1px solid #BFBFBF;
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #EEE;
+}
+
+.label {
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+.input {
+  flex-grow: 1;
+  padding-right: 1rem;
+  border: none;
+  /* border: 1px solid red; */
+  font-size: inherit;
+  font-weight: 700;
+  text-align: right;
+  background: transparent;
+}
+
+.input--font-family {
+  font-weight: 300;
+}
+
+input[type="color" i]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color" i]::-webkit-color-swatch {
+  border: none;
+}
+
+.input--color {
+  flex-shrink: 0;
+  height: 3rem;
+  border: none;
+  background: transparent;
+}
+
+.btn {
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 1rem 2rem;
+  font-weight: 100;
+  letter-spacing: 0.1rem;
+  color: black;
+  border: 1px solid #CCC;
+  border-bottom-width: 3px;
+  background: transparent;
+}
+
+.btn-action {
+  border-color: #AAA;
+  background: #FF4316;
+}
+
+.btn:hover {
+  border-color: #AAA;
+}
+
+.btn:active {
+  padding-top: calc(1rem + 2px);
+  border-top-width: 3px;
+  border-bottom-width: 1px;
+}
+

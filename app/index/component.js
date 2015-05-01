@@ -17,6 +17,11 @@ export default Ember.Component.extend({
     });
   },
 
+  didInsertElement() {
+    var iconic = IconicJS();
+    iconic.update();
+  },
+
   actions: {
     reload() {
       window.location.reload();
