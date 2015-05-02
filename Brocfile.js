@@ -18,5 +18,6 @@ var app = new EmberApp();
 // along with the exports of each module as its value.
 
 app.import('vendor/iconic.min.js');
+app.import('bower_components/fakehr/fakehr.js');
 
 module.exports = app.toTree();

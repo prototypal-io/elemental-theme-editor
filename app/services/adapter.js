@@ -1,6 +1,4 @@
 import Ember from 'ember';
-// import ChromeAdapter from '../adapters/chrome';
-// import config from '../config/environment';
 
 export default Ember.Service.extend({
   _tabId: null,
@@ -9,8 +7,8 @@ export default Ember.Service.extend({
     this._super(...arguments);
     this.router = this.container.lookup('router:main');
     this._loadingActionsPromise = this._loadElementalActions();
-    if (this._isChrome()) {
-      this._setupChrome();
+    if (this._isChromeDevtools()) {
+      this._chromeSetup();
     } else {
       window.addEventListener('message', event => {
         let componentName = event.data;
@@ -19,11 +17,11 @@ export default Ember.Service.extend({
     }
   },
 
-  _isChrome() {
-    return typeof chrome !== "undefined";
+  _isChromeDevtools() {
+    return (typeof chrome !== "undefined") && chrome.devtools;
   },
 
-  _setupChrome() {
+  _chromeSetup() {
     let devtools = chrome.devtools;
     let runtime  = chrome.runtime;
 
@@ -56,7 +54,7 @@ export default Ember.Service.extend({
   },
 
   _call(action, data) {
-    if (this._isChrome()) {
+    if (this._isChromeDevtools()) {
       chrome.extension.sendMessage({from: 'devtools', action: action, tabId: this._tabId, data: data});
     } else if (window.opener) {
       // need action + data
@@ -68,18 +66,27 @@ export default Ember.Service.extend({
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest();
 
-      // if bookmarklet, immediately exit because shit's already loaded
-      if (window.opener) { resolve(); return; }
+      debugger;
+      // if bookmarklet or not chrome devtools, immediately exit because
+      // elemental-actions.js is either already loaded (bookmarklet)
+      // or not supported yet (ff devtools)
+      if (window.opener || !this._isChromeDevtools()) {
+        resolve();
+        return;
+      }
 
-      let url = '/elemental-actions.js';
-      if (this._isChrome()) {
+      // the following chrome checks are just reminders for when we add ff devtools
+      if (this._isChromeDevtools()) {
         url = chrome.extension.getURL(url);
       }
 
       xhr.open("GET", url, true);
       xhr.onload = e => {
         let contents = xhr.responseText;
-        let evalFn = this._isChrome() ? chrome.devtools.inspectedWindow.eval : eval;
+        let evalFn;
+        if (this._isChromeDevtools()) {
+          evalFn = chrome.devtools.inspectedWindow.eval
+        }
         evalFn(contents + '//@ sourceURL=elemental-actions.js');
         resolve(e);
       };

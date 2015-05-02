@@ -14,11 +14,16 @@ export default Ember.Component.extend({
 
   init: function() {
     this._super(...arguments);
-    this.get('adapter'); // instantiate this immediately
-    Ember.$.getJSON('http://localhost:4200/theme').then(themeJSON => {
-      this._themeJSON = themeJSON;
-      this.setProperties(themeJSON.globals);
-    });
+
+    let xhr = new XMLHttpRequest();
+    xhr.open('get', 'http://localhost:4200/theme', true);
+    xhr.onload = e => {
+      Ember.run(() => {
+        let themeJSON = JSON.parse(xhr.responseText);
+        this._themeJSON = themeJSON;
+        this.setProperties(themeJSON.globals);
+      });
+    };
   },
 
   didInsertElement() {
