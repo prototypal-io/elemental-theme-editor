@@ -19,18 +19,24 @@
       }
     },
 
-    _loadCSS: function() {
-      console.log('loaded css');
+    _fetchCSS: function() {
+      console.log('elemental actions loaded - post messaging fetchCSS');
+      this.postMessage({ action: 'fetchCSS' });
     },
 
+    // connects to content script and loads css when complete
     _connectToContentScript: function() {
       var channel = new MessageChannel();
       this._port = channel.port1;
-      global.postMessage('elemental-actions-setup', '*', [channel.port2]);
+      global.postMessage({ action: 'elemental-actions-setup'}, '*', [channel.port2]);
 
       this._port.onmessage = function(event) {
         var message = event.data;
-        Elemental.send(message.action, message.data);
+        if (message.action === 'portSetupComplete') {
+          Elemental._fetchCSS();
+        } else {
+          Elemental.send(message.action, message.data);
+        }
       };
     },
 
@@ -165,7 +171,7 @@
       var component = Ember.View.views[componentEl.id];
       var componentName = component._debugContainerKey.replace('component:', '');
       console.log('COMPONENT CLICKED - SENDING ACTION TO DEVTOOLS!');
-      this.postMessage(componentName);
+      this.postMessage({ action: 'componentClicked', componentName: componentName });
     },
 
     bindActions: function() {
@@ -180,8 +186,7 @@
       this.bindActions();
       this.highlightComponents = this.highlightComponents.bind(this);
       this.selectComponent     = this.selectComponent.bind(this);
-      this._loadCSS();
-      this._connectToContentScript();
+      this._connectToContentScript(); // connects to content script and fetches/reloads css when complete
     }
   };
 

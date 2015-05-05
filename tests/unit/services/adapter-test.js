@@ -9,12 +9,17 @@ moduleFor('service:adapter', {
   // needs: ['service:router']
 });
 
-// Replace this with your real tests.
-test('it correctly sets up for chrome', function(assert) {
-  var adapter = this.subject();
-  var backgroundPageInit, tabId;
+// how do I test chrome devtools?
+test('it correctly sets up for chrome devtools', function(assert) {
+  let adapter = this.subject();
+  let backgroundPageInit, tabId;
 
-  var chrome = {
+  // THIS WILL NOT WORK because of the async XHR in _loadElementalActions
+  // fakehr.start();
+  // let request = fakehr.match('get', 'chrome-extension://testing-id-12345/elemental-actions.js');
+  // request.respond(200, {}, "<placeholder for elemental actions script>");
+
+  window.chrome = {
     runtime: {
       connect: function(opts) {
         // this returned object is a background page connection
@@ -26,7 +31,7 @@ test('it correctly sets up for chrome', function(assert) {
 
           onMessage: {
             addListener: function(callback) {
-
+              // expect callback here
             }
           }
         };
@@ -35,14 +40,26 @@ test('it correctly sets up for chrome', function(assert) {
 
     devtools: {
       inspectedWindow: {
-        tabId: 32
+        tabId: 32,
+
+        // NOTE: YOU CANNOT BIND eval IN STRICT MODE,
+        // so we use this testingEval thing
+        testingEval: function(evalStr) {
+          // expect evalStr here
+        }
+      }
+    },
+
+    extension: {
+      getURL: function(url) {
+        return 'chrome-extension://testing-id-12345/elemental-actions.js';
       }
     }
   };
 
-  assert.equal(adapter._isChrome(), true);
+  assert.equal(adapter._isChromeDevtools(), true);
 
-  // not sure why this doesn't work :/
+  // I want to get these working:
   // assert.equal(backgroundPageInit, 'init');
   // assert.equal(tabId, 32);
 
@@ -51,8 +68,8 @@ test('it correctly sets up for chrome', function(assert) {
 
 test('_loadElementalActions and callAction works', function(assert) {
   // how do I test this?
-  var adapter = this.subject();
-  var chrome = {
+  let adapter = this.subject();
+  let chrome = {
     extension: {
       getURL: function() {
 
@@ -60,8 +77,8 @@ test('_loadElementalActions and callAction works', function(assert) {
     }
   };
 
-  var server = new Pretender(function() {
-    this.get('')
+  let server = new Pretender(function() {
+    // this.get('');
   });
 
   assert.ok(adapter);

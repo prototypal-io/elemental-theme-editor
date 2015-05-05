@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  _themeJSON: null,
+  _theme: null,
   _inspectActive: null,
   adapter: Ember.inject.service(),
   fontFamily: null,
@@ -11,17 +11,50 @@ export default Ember.Component.extend({
   inspectActive: Ember.computed('_inspectActive', function() {
     if (this._inspectActive) { return 'inspect-active'; }
   }),
+  fonts: [
+    "Arial",
+    "Arial Black",
+    "Book Antiqua",
+    "Charcoal",
+    "Comic Sans MS",
+    "Courier New",
+    "Georgia",
+    "Helvetica",
+    "Impact",
+    "Lucida Console",
+    "Lucida Sans Unicode",
+    "monospace",
+    "Monaco",
+    "Palatino Linotype",
+    "sans-serif",
+    "serif",
+    "Tahoma",
+    "Trebuchet MS",
+    "Verdana"
+  ],
+
 
   init: function() {
     this._super(...arguments);
+    let adapter = this.get('adapter');
 
     let xhr = new XMLHttpRequest();
     xhr.open('get', 'http://localhost:4200/theme', true);
-    xhr.onload = e => {
+    xhr.send();
+    xhr.onload = () => {
       Ember.run(() => {
-        let themeJSON = JSON.parse(xhr.responseText);
-        this._themeJSON = themeJSON;
-        this.setProperties(themeJSON.globals);
+        console.log('loaded theme settings!');
+        let theme = JSON.parse(xhr.responseText) || null;
+        this._theme = theme;
+        this.setProperties(theme.globals);
+
+        // if the adapter/ele-actions.js is ready to reload the CSS,
+        // do it - otherwise, set the loaded theme on the adapter
+        if (adapter._reloadCSSReady) {
+          adapter.callAction('reloadCSS', theme);
+        } else {
+          adapter._theme = theme;
+        }
       });
     };
   },
@@ -37,19 +70,22 @@ export default Ember.Component.extend({
     },
 
     save() {
-      console.log('saving settings!');
-      this._themeJSON.globals = this.getProperties('fontFamily', 'scale', 'color', 'surface');
+      if (!this._theme) { console.log('no _theme - halting'); return; }
 
-      Ember.$.ajax('http://localhost:4200/theme', {
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(this._themeJSON)
-      }).then(json => {
-        this.get('adapter').callAction('reloadCSS', json.theme);
-      }, xhr => {
-        console.warn('FAILURE:');
-        console.log(xhr);
-      });
+      this._theme.globals = this.getProperties('fontFamily', 'scale', 'color', 'surface');
+
+      let xhr = new XMLHttpRequest();
+      xhr.open('post', 'http://localhost:4200/theme', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(this._theme));
+      xhr.onload = e => {
+        Ember.run(() => {
+          console.log('saving settings!');
+          let response = JSON.parse(xhr.responseText);
+          let theme = response.theme;
+          this.get('adapter').callAction('reloadCSS', theme);
+        });
+      };
     },
 
     inspect() {
