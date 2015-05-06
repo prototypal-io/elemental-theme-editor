@@ -37,16 +37,27 @@ test('visit root and ensure theme.json data loads and save sends correct data', 
     assert.equal(find('input[name=color]')[0].value, '#D8D8D8');
     assert.equal(find('input[name=surface]')[0].value, 'on');
 
-    // populate new data and save!
-    find('input[name=fontFamily]')[0].value = 'American Typewriter';
-    find('input[name=scale]')[0].value = '4:3';
-    find('input[name=color]')[0].value = '#112233';
-    find('input[name=surface]')[0].value = 'off';
-    // these new values aren't changing the component's properties by the time this click happens
-    find('button.btn')[0].click();
+    // set new global settings and save!
+    fillIn('input[name=fontFamily]', 'American Typewriter');
+    fillIn('input[name=scale]', '4:3');
+    fillIn('input[name=color]', '#112233');
+    click('input[name=surface]').then(() => {
+      click('button.btn')[0];
+    });
   });
 
   andThen(() => {
+    // the form is correctly filled in, and after save is clicked and
+    // there is a post request with the correct body
     let request = fakehr.match('POST', 'http://localhost:4200/theme');
+    let themeGlobals = JSON.parse(request.requestBody).globals;
+    assert.equal(find('input[name=fontFamily]')[0].value, 'American Typewriter');
+    assert.equal(find('input[name=scale]')[0].value, '4:3');
+    assert.equal(find('input[name=color]')[0].value, '#112233');
+    assert.equal(find('input[name=surface]')[0].checked, false);
+    assert.equal(themeGlobals.fontFamily, 'American Typewriter');
+    assert.equal(themeGlobals.scale, '4:3');
+    assert.equal(themeGlobals.color, '#112233');
+    assert.equal(themeGlobals.surface, false);
   });
 });

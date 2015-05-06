@@ -9,14 +9,9 @@ moduleFor('service:adapter', {
   // needs: ['service:router']
 });
 
-// how do I test chrome devtools?
-
-
 test('it correctly sets up for chrome devtools', function(assert) {
   let adapter = this.subject();
   let backgroundPageInit, tabId, request;
-  // let done = assert.async();
-  // THIS WILL NOT WORK because of the async XHR in _loadElementalActions
   fakehr.start();
 
   window.chrome = {
