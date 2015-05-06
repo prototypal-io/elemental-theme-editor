@@ -1,0 +1,8 @@
+{{input class="input input--font-family" type="text" value=value key-down="typed" focus-in="focused" focus-out="blurred"}}
+{{#if isFocused}}
+  <ul>
+    {{#each filteredOptions as |option|}}
+      <li {{action "choose" option}}>{{option}}</li>
+    {{/each}}
+  </ul>
+{{/if}}
