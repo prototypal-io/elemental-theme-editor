@@ -8,24 +8,29 @@
 (function(global) {
   global.Elemental = {
     _inspecting: false,
+    _elementSelected: false,
 
-    // a _port property (MessageChannel port) is set on
-    // this object to communicate with the extension
-    postMessage: function(message) {
+    init: function() {
+      this.bindActions();
+      this.highlightComponents = this.highlightComponents.bind(this);
+      this.selectComponent     = this.selectComponent.bind(this);
+
       if (global._openedWindow) {
-        global._openedWindow.postMessage(message, '*');
-      } else if (this._port) {
-        this._port.postMessage(message);
+        this._openedWindowSetup();
+      } else {
+        this._contentScriptSetup(); // connects to content script and fetches/reloads css when complete
       }
     },
 
-    _fetchCSS: function() {
-      console.log('elemental actions loaded - post messaging fetchCSS');
-      this.postMessage({ action: 'fetchCSS' });
+    _openedWindowSetup: function() {
+      global.addEventListener('message', function(event) {
+        var message = JSON.parse(event.data);
+        Elemental.send(message.action, message.data);
+      });
     },
 
     // connects to content script and loads css when complete
-    _connectToContentScript: function() {
+    _contentScriptSetup: function() {
       var channel = new MessageChannel();
       this._port = channel.port1;
       global.postMessage({ action: 'elemental-actions-setup'}, '*', [channel.port2]);
@@ -38,6 +43,24 @@
           Elemental.send(message.action, message.data);
         }
       };
+    },
+
+    _fetchCSS: function() {
+      console.log('elemental actions loaded - post messaging fetchCSS');
+      this.postMessage({ action: 'fetchCSS' });
+    },
+
+    // for the devtools, a _port property (MessageChannel port) is set on
+    // this object to communicate with the extension (in _connectToContentScript)
+
+    // for the bookmarklet, an _openedWindow property is set on this object
+    // to communicate with the theme editor running in another window
+    postMessage: function(message) {
+      if (global._openedWindow) {
+        global._openedWindow.postMessage(message, '*');
+      } else if (this._port) {
+        this._port.postMessage(message);
+      }
     },
 
     send: function(actionName, data) {
@@ -156,8 +179,6 @@
       // componentEl.classList.add("elemental-inspected");
     },
 
-    _elementSelected: false,
-
     // determine if ember component and send message w/ component if true
     selectComponent: function(e) {
       var componentEl = this.findComponentForEvent(e);
@@ -180,13 +201,6 @@
         if (!actions.hasOwnProperty(key)) { continue; }
         actions[key] = actions[key].bind(this);
       }
-    },
-
-    init: function() {
-      this.bindActions();
-      this.highlightComponents = this.highlightComponents.bind(this);
-      this.selectComponent     = this.selectComponent.bind(this);
-      this._connectToContentScript(); // connects to content script and fetches/reloads css when complete
     }
   };
 

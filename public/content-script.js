@@ -1,6 +1,7 @@
 (function(global) {
   global.addEventListener('message', function(event) {
     var port, action
+    console.log("content script: ");
     console.log(event);
     if (event.data.action === 'elemental-actions-setup') {
       port = event.ports[0];

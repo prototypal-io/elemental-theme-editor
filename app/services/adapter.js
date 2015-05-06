@@ -14,10 +14,7 @@ export default Ember.Service.extend({
     if (this._isChromeDevtools()) {
       this._chromeSetup();
     } else {
-      window.addEventListener('message', event => {
-        let message = event.data;
-        this._handleIncomingMessage(message);
-      }, false);
+      this._bookmarkletSetup();
     }
   },
 
@@ -26,19 +23,6 @@ export default Ember.Service.extend({
       return true;
     } else {
       return false;
-    }
-  },
-
-  _handleIncomingMessage(message) {
-    if (message.action === 'fetchCSS') {
-      if (this._theme) {
-        this.callAction('reloadCSS', this._theme);
-      } else {
-        this._reloadCSSReady = true;
-      }
-    } else if (message.action === 'componentClicked') {
-      let componentName = message.data;
-      this.router.transitionTo('component', componentName);
     }
   },
 
@@ -63,6 +47,34 @@ export default Ember.Service.extend({
     });
   },
 
+  _bookmarkletSetup() {
+    window.addEventListener('message', event => {
+      let message = event.data;
+      this._handleIncomingMessage(message);
+    }, false);
+
+    // because the event listener is usually not set up by the
+    //  time fetchCSS is fired, the initial reloadCSS is handled here
+    if (this._theme) {
+      this.callAction('reloadCSS', this._theme);
+    } else {
+      this._reloadCSSReady = true;
+    }
+  },
+
+  _handleIncomingMessage(message) {
+    if (message.action === 'fetchCSS') {
+      if (this._theme) {
+        this.callAction('reloadCSS', this._theme);
+      } else {
+        this._reloadCSSReady = true;
+      }
+    } else if (message.action === 'componentClicked') {
+      let componentName = message.data;
+      this.router.transitionTo('component', componentName);
+    }
+  },
+
   callAction(action, data) {
     this._loadingActionsPromise.then(() => {
       this._call(action, data);
@@ -75,8 +87,9 @@ export default Ember.Service.extend({
     if (this._isChromeDevtools()) {
       chrome.extension.sendMessage({from: 'devtools', action: action, tabId: this._tabId, data: data});
     } else if (window.opener) {
-      // need action + data
-      window.opener.postMessage(action, '*');
+      let message = { action: action, data: data };
+      let stringifiedMessage = JSON.stringify(message);
+      window.opener.postMessage(stringifiedMessage, '*');
     }
   },
 
