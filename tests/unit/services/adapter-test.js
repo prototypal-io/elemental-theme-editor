@@ -10,14 +10,14 @@ moduleFor('service:adapter', {
 });
 
 // how do I test chrome devtools?
+
+
 test('it correctly sets up for chrome devtools', function(assert) {
   let adapter = this.subject();
-  let backgroundPageInit, tabId;
-
+  let backgroundPageInit, tabId, request;
+  // let done = assert.async();
   // THIS WILL NOT WORK because of the async XHR in _loadElementalActions
-  // fakehr.start();
-  // let request = fakehr.match('get', 'chrome-extension://testing-id-12345/elemental-actions.js');
-  // request.respond(200, {}, "<placeholder for elemental actions script>");
+  fakehr.start();
 
   window.chrome = {
     runtime: {
@@ -27,11 +27,14 @@ test('it correctly sets up for chrome devtools', function(assert) {
           postMessage: function(opts) {
             backgroundPageInit = opts.name;
             tabId = opts.tabId;
+            assert.equal(backgroundPageInit, 'init');
+            assert.equal(tabId, 32);
           },
 
           onMessage: {
             addListener: function(callback) {
-              // expect callback here
+              // this test might be able to be more robust?
+              assert.equal(typeof callback, "function");
             }
           }
         };
@@ -45,7 +48,7 @@ test('it correctly sets up for chrome devtools', function(assert) {
         // NOTE: YOU CANNOT BIND eval IN STRICT MODE,
         // so we use this testingEval thing
         testingEval: function(evalStr) {
-          // expect evalStr here
+          assert.equal(evalStr, "window.foo = function() {}//@ sourceURL=elemental-actions.js");
         }
       }
     },
@@ -57,13 +60,12 @@ test('it correctly sets up for chrome devtools', function(assert) {
     }
   };
 
-  assert.equal(adapter._isChromeDevtools(), true);
-
-  // I want to get these working:
-  // assert.equal(backgroundPageInit, 'init');
-  // assert.equal(tabId, 32);
-
   assert.ok(adapter);
+
+  adapter._loadElementalActions();
+  request = fakehr.match('get', 'chrome-extension://testing-id-12345/elemental-actions.js');
+  request.respond(200, {}, "window.foo = function() {}");
+
 });
 
 test('_loadElementalActions and callAction works', function(assert) {

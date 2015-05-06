@@ -22,7 +22,8 @@
     "currentURL",
     "currentPath",
     "currentRouteName",
-    "fakehr"
+    "fakehr",
+    "ElementalThemeEditor"
   ],
   "node": false,
   "browser": false,

@@ -100,18 +100,16 @@ export default Ember.Service.extend({
       }
 
       xhr.open("GET", url, true);
+      xhr.send();
       xhr.onload = e => {
         Ember.run(() => {
           let contents = xhr.responseText;
           let evalFn;
 
-          // why is ElementalThemeEditor defined here but not outside the run loop?
-          // if (ElementalThemeEditor.testing) {
-            // what's the best way to handle mocking eval for tests?
-            // should I even do this? :/
-            // evalFn = chrome.devtools.inspectedWindow.testingEval;
-          // } else
-          if (this._isChromeDevtools()) {
+          // we can't bind eval, is this a good workaround?
+          if (ElementalThemeEditor.testing) {
+            evalFn = chrome.devtools.inspectedWindow.testingEval;
+          } else if (this._isChromeDevtools()) {
             evalFn = chrome.devtools.inspectedWindow.eval;
           }
           evalFn(contents + '//@ sourceURL=elemental-actions.js');
@@ -122,8 +120,6 @@ export default Ember.Service.extend({
       xhr.onerror = e => {
         reject(e);
       };
-
-      xhr.send();
     });
   }
 });

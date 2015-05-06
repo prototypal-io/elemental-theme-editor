@@ -5,7 +5,8 @@
     "-Promise", /* why the heck is there a dash in front of this? */
     "Promise",
     "chrome",
-    "IconicJS"
+    "IconicJS",
+    "ElementalThemeEditor"
   ],
   "browser": true,
   "boss": true,
