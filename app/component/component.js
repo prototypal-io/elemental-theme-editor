@@ -10,7 +10,7 @@ export default Ember.Component.extend({
     Ember.$.getJSON('http://localhost:4200/theme').then(parsedThemeJSON => {
       // this component is expecting the component's properties to be in theme.json
       this._theme = parsedThemeJSON;
-      this.setProperties(themeJSON[this.get('model')]);
+      this.setProperties(parsedThemeJSON[this.get('model')]);
 
       // this.set('settings', themeJSON[this.get('model')]);
 

@@ -15,7 +15,8 @@ export default Ember.Service.extend({
       this._chromeSetup();
     } else {
       window.addEventListener('message', event => {
-        this._handleIncomingMessage()
+        let message = event.data;
+        this._handleIncomingMessage(message);
       }, false);
     }
   },

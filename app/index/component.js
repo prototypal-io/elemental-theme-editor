@@ -78,7 +78,7 @@ export default Ember.Component.extend({
       xhr.open('post', 'http://localhost:4200/theme', true);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.send(JSON.stringify(this._theme));
-      xhr.onload = e => {
+      xhr.onload = () => {
         Ember.run(() => {
           console.log('saving settings!');
           let response = JSON.parse(xhr.responseText);
