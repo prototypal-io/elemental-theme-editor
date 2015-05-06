@@ -67,21 +67,3 @@ test('it correctly sets up for chrome devtools', function(assert) {
   request.respond(200, {}, "window.foo = function() {}");
 
 });
-
-test('_loadElementalActions and callAction works', function(assert) {
-  // how do I test this?
-  let adapter = this.subject();
-  let chrome = {
-    extension: {
-      getURL: function() {
-
-      }
-    }
-  };
-
-  let server = new Pretender(function() {
-    // this.get('');
-  });
-
-  assert.ok(adapter);
-});
