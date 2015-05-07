@@ -30,7 +30,7 @@ test('visit root and ensure theme.json data loads and save sends correct data', 
   fakehr.start();
   visit('/');
   andThen(() => {
-    let request = fakehr.match('get', 'http://localhost:4200/theme');
+    let request = fakehr.match('get', 'http://testing-url:1337/theme');
     request.respond(200, { 'Content-Type': 'application/json' }, JSON.stringify(themeJSON));
     assert.equal(find('input[name=fontFamily]')[0].value, 'Arial');
     assert.equal(find('input[name=scale]')[0].value, '2:1');
@@ -49,7 +49,7 @@ test('visit root and ensure theme.json data loads and save sends correct data', 
   andThen(() => {
     // the form is correctly filled in, and after save is clicked and
     // there is a post request with the correct body
-    let request = fakehr.match('POST', 'http://localhost:4200/theme');
+    let request = fakehr.match('POST', 'http://testing-url:1337/theme');
     let themeGlobals = JSON.parse(request.requestBody).globals;
     assert.equal(find('input[name=fontFamily]')[0].value, 'American Typewriter');
     assert.equal(find('input[name=scale]')[0].value, '4:3');

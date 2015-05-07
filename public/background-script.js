@@ -6,9 +6,11 @@
     function extensionListener(message, sender, sendResponse) {
       // The original connection event doesn't include the tab ID of the
       // DevTools page, so we need to send it explicitly.
-      if (message.name == "init") {
+      if (message.name == "el-bs-init") {
         connections[message.tabId] = port;
-        return;
+        // when background script receives init from DT,
+        // set up post message listening on CS
+        chrome.tabs.sendMessage(message.tabId, { from: 'devtools', action: 'el-cs-init' });
       }
 
     	// other message handling

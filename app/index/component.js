@@ -33,14 +33,16 @@ export default Ember.Component.extend({
     "Verdana"
   ],
 
-
   init: function() {
     this._super(...arguments);
     let adapter = this.get('adapter');
 
     let xhr = new XMLHttpRequest();
-    xhr.open('get', 'http://localhost:4200/theme', true);
-    xhr.send();
+    this.get('adapter')._windowUrl(windowUrl => {
+      xhr.open('get', windowUrl + '/theme', true);
+      xhr.send();
+    });
+
     xhr.onload = () => {
       Ember.run(() => {
         console.log('loaded theme settings!');
@@ -48,6 +50,7 @@ export default Ember.Component.extend({
         this._theme = theme;
         this.setProperties(theme.globals);
 
+        // debugger;
         // if the adapter/ele-actions.js is ready to reload the CSS,
         // do it - otherwise, set the loaded theme on the adapter
         if (adapter._reloadCSSReady) {
@@ -75,9 +78,12 @@ export default Ember.Component.extend({
       this._theme.globals = this.getProperties('fontFamily', 'scale', 'color', 'surface');
 
       let xhr = new XMLHttpRequest();
-      xhr.open('post', 'http://localhost:4200/theme', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify(this._theme));
+      this.get('adapter')._windowUrl(windowUrl => {
+        xhr.open('post', windowUrl + '/theme', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(this._theme));
+      });
+
       xhr.onload = () => {
         Ember.run(() => {
           console.log('saving settings!');

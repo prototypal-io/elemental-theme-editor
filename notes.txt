@@ -1,0 +1,17 @@
+Setting up Message Channels
+
+Extension:
+  open DT, BS tells CS to listen for messages for IW, IW loads EA and PM's the MC port
+Bookmarklet:
+  open popup, bookmarklet code listens for MC port, popup PM's the MC port to IW
+
+_windowUrl should probably not even require a callback because we will send the
+window url once the message channel setup completes :)
+
+1.) DT evals to check if ember app
+2.) DT PM's to BS
+3.) BS PM's to CS
+4.) CS PM's to BS
+5.) BS PM's to DT
+6.) DT evals EA to IW
+7.) IW sends MC port to CS

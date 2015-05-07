@@ -6,9 +6,15 @@
 // 2.) bookmarklet:
 // elemental-styles.css + this file are appended
 (function(global) {
+  var port;
+  if (global.Elemental) {
+    port = global.Elemental._port;
+  }
+
   global.Elemental = {
     _inspecting: false,
     _elementSelected: false,
+    _port: port,
 
     init: function() {
       this.bindActions();
@@ -23,21 +29,22 @@
     },
 
     _openedWindowSetup: function() {
-      global.addEventListener('message', function(event) {
-        var message = JSON.parse(event.data);
-        Elemental.send(message.action, message.data);
-      });
+      // let channel = new MessageChannel;
+      // global.addEventListener('message', function(event) {
+      //   var message = JSON.parse(event.data);
+      //   Elemental.send(message.action, message.data);
+      // });
     },
 
     // connects to content script and loads css when complete
     _contentScriptSetup: function() {
       var channel = new MessageChannel();
       this._port = channel.port1;
-      global.postMessage({ action: 'elemental-actions-setup'}, '*', [channel.port2]);
+      global.postMessage({ action: 'ea-port-setup'}, '*', [channel.port2]);
 
       this._port.onmessage = function(event) {
         var message = event.data;
-        if (message.action === 'portSetupComplete') {
+        if (message.action === 'ea-port-setup-complete') {
           Elemental._fetchCSS();
         } else {
           Elemental.send(message.action, message.data);

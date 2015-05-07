@@ -1,16 +1,25 @@
 (function(global) {
-  global.addEventListener('message', function(event) {
-    var port, action
-    console.log("content script: ");
-    console.log(event);
-    if (event.data.action === 'elemental-actions-setup') {
-      port = event.ports[0];
-      listenToPort(port);
+  chrome.runtime.onMessage.addListener(function(message, sender) {
+    if (message.action === 'el-cs-init') {
+      beginGlobalListen();
+      chrome.runtime.sendMessage({ action: 'el-cs-init-complete' });
     }
   });
 
+  function beginGlobalListen() {
+    global.addEventListener('message', function(event) {
+      var port, action
+      console.log("content script: ");
+      console.log(event);
+      if (event.data.action === 'ea-port-setup') {
+        port = event.ports[0];
+        listenToPort(port);
+      }
+    });
+  }
+
   function listenToPort(port) {
-    port.postMessage({ action: 'portSetupComplete' });
+    port.postMessage({ action: 'ea-port-setup-complete' });
     // Listens to messages coming directly from background script
     chrome.runtime.onMessage.addListener(function(message, sender) {
       if (message.from === 'devtools') {
