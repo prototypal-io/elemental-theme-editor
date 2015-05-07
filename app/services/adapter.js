@@ -5,12 +5,29 @@ export default Ember.Service.extend({
   _theme: null,
   // _reloadCSSReady means ele-actions.js is set up and a connection has been established
   _reloadCSSReady: false,
+  _bookmarkletInspectedWindowUrl: null,
+  _bookmarkletInspectedWindowUrlResolve: null,
 
   init() {
+    // this is starting to get gross - might want to split bookmarklet and chrome adapters up
     this._super(...arguments);
     this.router = this.container.lookup('router:main');
+
     this._setupDeferred = Ember.RSVP.defer();
     this._loadingActionsPromise = this._loadElementalActions();
+
+    debugger;
+    this._bookmarkletInspectedWindowUrlPromise = new Promise(resolve => {
+      if (this._isChromeDevtools()) {
+        resolve();
+      } else if (window.opener) {
+        this._bookmarkletInspectedWindowUrlResolve = resolve;
+      } else if (ElementalThemeEditor.testing) {
+        resolve();
+      }
+    });
+
+    this._inspectedWindowUrlPromise = this._loadInspectedWindowUrl();
 
     if (this._isChromeDevtools()) {
       this._chromeSetup();
@@ -27,17 +44,20 @@ export default Ember.Service.extend({
     }
   },
 
-  _windowUrl(callback) {
-    if (this._isChromeDevtools()) {
-      chrome.devtools.inspectedWindow.eval("window.location.origin", windowUrl => {
-        callback(windowUrl);
+  _loadInspectedWindowUrl() {
+    return this._bookmarkletInspectedWindowUrlPromise.then(() => {
+      return new Promise(resolve => {
+        if (this._isChromeDevtools()) {
+          chrome.devtools.inspectedWindow.eval("window.location.origin", windowUrl => {
+            resolve(windowUrl);
+          });
+        } else if (window.opener) {
+          resolve(this._bookmarkletInspectedWindowUrl);
+        } else if (ElementalThemeEditor.testing) {
+          callback('http://testing-url:1337');
+        }
       });
-    } else if (window.opener) {
-      // callback(window.opener.location.origin);
-      callback("http://localhost:4200");
-    } else if (ElementalThemeEditor.testing) {
-      callback('http://testing-url:1337');
-    }
+    });
   },
 
   _chromeSetup() {
@@ -62,20 +82,23 @@ export default Ember.Service.extend({
   },
 
   _bookmarkletSetup() {
+    debugger;
     let channel = new MessageChannel();
     this._port = channel.port1;
     let message = { action: 'ete-port-setup' };
     let stringifiedMessage = JSON.stringify(message);
-    window.opener.postMessage(stringifiedMessage, '*', [channel.port2]);
 
     // this shouldn't even have to happen
     // refactor the init/_loadElementalActions
     this._setupDeferred.resolve();
 
     this._port.onmessage = event => {
+      debugger;
       let message = event.data;
       this._handleIncomingMessage(message);
     };
+
+    window.opener.postMessage(stringifiedMessage, '*', [channel.port2]);
 
     // // because the event listener is usually not set up by the
     // //  time fetchCSS is fired, the initial reloadCSS is handled here
@@ -100,6 +123,10 @@ export default Ember.Service.extend({
       this._setupDeferred.resolve();
       // once content script init is complete,
       // devtools evals EA to inspected window
+    } else if (message.action === 'ete-port-setup-complete') {
+      debugger;
+      this._bookmarkletInspectedWindowUrl = message.data;
+      this._bookmarkletInspectedWindowUrlResolve();
     }
   },
 

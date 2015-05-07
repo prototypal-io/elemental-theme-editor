@@ -38,7 +38,7 @@ export default Ember.Component.extend({
     let adapter = this.get('adapter');
 
     let xhr = new XMLHttpRequest();
-    this.get('adapter')._windowUrl(windowUrl => {
+    this.get('adapter')._inspectedWindowUrlPromise.then(windowUrl => {
       xhr.open('get', windowUrl + '/theme', true);
       xhr.send();
     });
@@ -50,6 +50,10 @@ export default Ember.Component.extend({
         this._theme = theme;
         this.setProperties(theme.globals);
 
+        if (window.opener) {
+          adapter.callAction('reloadCSS', theme);
+        }
+        
         // debugger;
         // if the adapter/ele-actions.js is ready to reload the CSS,
         // do it - otherwise, set the loaded theme on the adapter
@@ -78,7 +82,7 @@ export default Ember.Component.extend({
       this._theme.globals = this.getProperties('fontFamily', 'scale', 'color', 'surface');
 
       let xhr = new XMLHttpRequest();
-      this.get('adapter')._windowUrl(windowUrl => {
+      this.get('adapter')._inspectedWindowUrlPromise.then(windowUrl => {
         xhr.open('post', windowUrl + '/theme', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(this._theme));

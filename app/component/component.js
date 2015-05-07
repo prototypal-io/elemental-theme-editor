@@ -6,7 +6,7 @@ export default Ember.Component.extend({
 
   init: function() {
     this._super(...arguments);
-    this.get('adapter')._windowUrl(windowUrl => {
+    this.get('adapter')._inspectedWindowUrlPromise.then(windowUrl => {
       Ember.$.getJSON(windowUrl + '/theme').then(parsedThemeJSON => {
         // this component is expecting the component's properties to be in theme.json
         this._theme = parsedThemeJSON;
@@ -35,7 +35,7 @@ export default Ember.Component.extend({
 
       this._theme[componentName] = this.getProperties(componentProps);
 
-      this.get('adapter')._windowUrl(windowUrl => {
+      this.get('adapter')._inspectedWindowUrlPromise.then(windowUrl => {
         Ember.$.ajax(windowUrl + '/theme', {
           type: 'POST',
           contentType: 'application/json',

@@ -24,6 +24,7 @@
 
 // TODO: you should be able to serve this from the ember-cli addon via express? or use a known URL
 
+
 (function() {
   var url = 'http://localhost:5555';
   var themeEditorWindow;
@@ -39,8 +40,10 @@
   function receiveMessage(event) {
     var message = JSON.parse(event.data),
         action = message.action,
-        port;
+        port,
+        response;
     if (action === 'ete-port-setup') {
+      debugger;
       port = event.ports[0];
       if (Elemental) {
         Elemental._port = port;
@@ -51,7 +54,10 @@
       port.onmessage = function(event) {
         var message = event.data;
         window.Elemental.send(message.action, message.data);
-      }
+      };
+
+      response = { action: 'ete-port-setup-complete', data: window.location.origin };
+      port.postMessage(response);
     }
   }
 })();
