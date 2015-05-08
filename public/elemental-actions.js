@@ -14,6 +14,7 @@
       this.highlightComponents = this.highlightComponents.bind(this);
       this.selectComponent     = this.selectComponent.bind(this);
 
+      // TODO: eval in a flag from the dev tools and use that instead
       if (!global._openedWindow && chrome) {
         this._contentScriptSetup(); // connects to content script and fetches/reloads css when complete
       }
@@ -21,23 +22,15 @@
 
     // connects to content script and loads css when complete
     _contentScriptSetup: function() {
+      var self = this;
       var channel = new MessageChannel();
-      this._port = channel.port1;
-      global.postMessage({ action: 'ea-port-setup'}, '*', [channel.port2]);
+      var port = this._port = channel.port1;
+      global.postMessage({action: 'ea-port-setup'}, '*', [channel.port2]);
 
-      this._port.onmessage = function(event) {
+      port.onmessage = function(event) {
         var message = event.data;
-        if (message.action === 'ea-port-setup-complete') {
-          Elemental._fetchCSS();
-        } else {
-          Elemental.send(message.action, message.data);
-        }
+        self.send(message.action, message.data);
       };
-    },
-
-    _fetchCSS: function() {
-      console.log('elemental actions loaded - post messaging fetchCSS');
-      this.postMessage({ action: 'fetchCSS' });
     },
 
     // for chrome and the bookmarklet, a _port property (MessageChannel port) is set on
@@ -53,6 +46,11 @@
     },
 
     actions: {
+      'ea-port-setup-complete': function() {
+        console.log('elemental actions loaded - post messaging fetchCSS');
+        this.postMessage({ action: 'fetchCSS' });
+      },
+
       reloadCSS: function(themeJson) {
         var links = $('link');
         links.remove();
