@@ -14,6 +14,11 @@ test('it correctly sets up for chrome devtools', function(assert) {
   let backgroundPageInit, tabId, request;
   fakehr.start();
 
+  adapter._eval = function(src) {
+    assert.equal(src, "window.foo = function() {}//@ sourceURL=elemental-actions.js");
+  },
+
+  // TODO: use sinon
   window.chrome = {
     runtime: {
       connect: function(opts) {
@@ -38,13 +43,7 @@ test('it correctly sets up for chrome devtools', function(assert) {
 
     devtools: {
       inspectedWindow: {
-        tabId: 32,
-
-        // NOTE: YOU CANNOT BIND eval IN STRICT MODE,
-        // so we use this testingEval thing
-        testingEval: function(evalStr) {
-          assert.equal(evalStr, "window.foo = function() {}//@ sourceURL=elemental-actions.js");
-        }
+        tabId: 32
       }
     },
 

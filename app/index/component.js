@@ -3,7 +3,9 @@ import Ember from 'ember';
 export default Ember.Component.extend({
   _theme: null,
   _inspectActive: null,
+
   adapter: Ember.inject.service(),
+
   fontFamily: null,
   scale: null,
   color: null,
@@ -11,6 +13,8 @@ export default Ember.Component.extend({
   inspectActive: Ember.computed('_inspectActive', function() {
     if (this._inspectActive) { return 'inspect-active'; }
   }),
+
+  // TODO: auto-detect available fonts (if possible?)
   fonts: [
     "Arial",
     "Arial Black",
@@ -37,9 +41,10 @@ export default Ember.Component.extend({
     this._super(...arguments);
     let adapter = this.get('adapter');
 
+    // TODO: Should likely be fetching our model data in the route
     let xhr = new XMLHttpRequest();
-    this.get('adapter')._inspectedWindowUrlPromise.then(windowUrl => {
-      xhr.open('get', windowUrl + '/theme', true);
+    adapter._inspectedWindowUrlPromise.then(windowUrl => {
+      xhr.open('get', windowUrl + '/theme');
       xhr.send();
     });
 
@@ -56,15 +61,11 @@ export default Ember.Component.extend({
         if (adapter._reloadCSSReady || window.opener) {
           adapter.callAction('reloadCSS', theme);
         } else {
+          // TODO: nuke me when we get proper theming support in our prebuilt CSS
           adapter._theme = theme;
         }
       });
     };
-  },
-
-  didInsertElement() {
-    var iconic = new IconicJS();
-    iconic.update();
   },
 
   actions: {

@@ -5,41 +5,21 @@ export default Ember.Service.extend({
   _theme: null,
   // _reloadCSSReady means ele-actions.js is set up and a connection has been established
   _reloadCSSReady: false,
-  _bookmarkletInspectedWindowUrl: null,
-  _bookmarkletInspectedWindowUrlResolve: null,
-  _contentScriptSetupResolve: null,
+  _inspectedWindowUrlPromise: null,
+  _findInspectedWindowUrlDeferred: null,
+  _setupContentScriptDeferred: null,
 
   init() {
     // this is starting to get gross - might want to split bookmarklet and chrome adapters up
     this._super(...arguments);
     this.router = this.container.lookup('router:main');
 
-    this._contentScriptSetupPromise = new Promise(resolve => {
-      if (this._isChromeDevtools()) {
-        this._contentScriptSetupResolve = resolve;
-      } else if (window.opener) {
-        resolve();
-      } else if (ElementalThemeEditor.testing) {
-        resolve();
-      }
-    });
-
+    this._setupContentScriptDeferred = this._setupContentScript();
     this._loadingActionsPromise = this._loadElementalActions();
-
-    this._bookmarkletInspectedWindowUrlPromise = new Promise(resolve => {
-      if (this._isChromeDevtools()) {
-        resolve();
-      } else if (window.opener) {
-        this._bookmarkletInspectedWindowUrlResolve = resolve;
-      } else if (ElementalThemeEditor.testing) {
-        resolve();
-      }
-    });
-
     this._inspectedWindowUrlPromise = this._loadInspectedWindowUrl();
 
     if (this._isChromeDevtools()) {
-      this._chromeSetup();
+      this._setupChromeBackgroundPage();
     } else if (window.opener) {
       this._bookmarkletSetup();
     }
@@ -53,23 +33,31 @@ export default Ember.Service.extend({
     }
   },
 
-  _loadInspectedWindowUrl() {
-    return this._bookmarkletInspectedWindowUrlPromise.then(() => {
-      return new Promise(resolve => {
-        if (this._isChromeDevtools()) {
-          chrome.devtools.inspectedWindow.eval("window.location.origin", windowUrl => {
-            resolve(windowUrl);
-          });
-        } else if (window.opener) {
-          resolve(this._bookmarkletInspectedWindowUrl);
-        } else if (ElementalThemeEditor.testing) {
-          resolve('http://testing-url:1337');
-        }
-      });
-    });
+  _setupContentScript() {
+    let deferred = Promise.defer();
+
+    if (!this._isChromeDevtools()) {
+      deferred.resolve();
+    }
+
+    return deferred;
   },
 
-  _chromeSetup() {
+  _loadInspectedWindowUrl() {
+    let deferred = this._findInspectedWindowUrlDeferred = Promise.defer();
+
+    if (this._isChromeDevtools()) {
+      chrome.devtools.inspectedWindow.eval("window.location.origin", windowUrl => {
+        deferred.resolve(windowUrl);
+      });
+    } else if (ElementalThemeEditor.testing) {
+      deferred.resolve('http://testing-url:1337');
+    }
+
+    return deferred.promise;
+  },
+
+  _setupChromeBackgroundPage() {
     let devtools = chrome.devtools;
     let runtime  = chrome.runtime;
 
@@ -91,7 +79,6 @@ export default Ember.Service.extend({
   },
 
   _bookmarkletSetup() {
-
     let channel = new MessageChannel();
     this._port = channel.port1;
     let message = { action: 'ete-port-setup' };
@@ -107,7 +94,7 @@ export default Ember.Service.extend({
   },
 
   _handleIncomingMessage(message) {
-    if (message.action === 'fetchCSS') {
+    if (message.action === 'fetchCSS') { // this is not going to be necessary
       if (this._theme) {
         this.callAction('reloadCSS', this._theme);
       } else {
@@ -119,10 +106,9 @@ export default Ember.Service.extend({
     } else if (message.action === 'el-cs-init-complete') {
       // once content script init is complete,
       // devtools evals EA to inspected window
-      this._contentScriptSetupResolve();
+      this._setupContentScriptDeferred.resolve();
     } else if (message.action === 'ete-port-setup-complete') {
-      this._bookmarkletInspectedWindowUrl = message.data;
-      this._bookmarkletInspectedWindowUrlResolve();
+      this._findInspectedWindowUrlDeferred.resolve(message.data);
     }
   },
 
@@ -135,6 +121,7 @@ export default Ember.Service.extend({
   },
 
   _call(action, data) {
+    // TODO: see if we can just use a MessageChannel port with Chrome dev tools?
     if (this._isChromeDevtools()) {
       chrome.extension.sendMessage({from: 'devtools', action: action, tabId: this._tabId, data: data});
     } else if (window.opener) {
@@ -142,8 +129,12 @@ export default Ember.Service.extend({
     }
   },
 
+  _eval(src) {
+    return chrome.devtools.inspectedWindow.eval(src);
+  },
+
   _loadElementalActions() {
-    return this._contentScriptSetupPromise.then(() => {
+    return this._setupContentScriptDeferred.promise.then(() => {
       return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         let url;
@@ -166,15 +157,7 @@ export default Ember.Service.extend({
         xhr.onload = e => {
           Ember.run(() => {
             let contents = xhr.responseText;
-            let evalFn;
-
-            // we can't bind eval, is this a good workaround?
-            if (ElementalThemeEditor.testing) {
-              evalFn = chrome.devtools.inspectedWindow.testingEval;
-            } else if (this._isChromeDevtools()) {
-              evalFn = chrome.devtools.inspectedWindow.eval;
-            }
-            evalFn(contents + '//@ sourceURL=elemental-actions.js');
+            this._eval(contents + '//@ sourceURL=elemental-actions.js');
             resolve(e);
           });
         };
