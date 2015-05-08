@@ -1,10 +1,3 @@
-// TODO: figure out how to load stylez
-
-// idea: adding styles is handled in two ways:
-// 1.) non-bookmarklet:
-// _styles property set on window through eval before this file is run
-// 2.) bookmarklet:
-// elemental-styles.css + this file are appended
 (function(global) {
   var port;
   if (global.Elemental) {
@@ -21,19 +14,9 @@
       this.highlightComponents = this.highlightComponents.bind(this);
       this.selectComponent     = this.selectComponent.bind(this);
 
-      if (global._openedWindow) {
-        this._openedWindowSetup();
-      } else {
+      if (!global._openedWindow && chrome) {
         this._contentScriptSetup(); // connects to content script and fetches/reloads css when complete
       }
-    },
-
-    _openedWindowSetup: function() {
-      // let channel = new MessageChannel;
-      // global.addEventListener('message', function(event) {
-      //   var message = JSON.parse(event.data);
-      //   Elemental.send(message.action, message.data);
-      // });
     },
 
     // connects to content script and loads css when complete
@@ -57,17 +40,10 @@
       this.postMessage({ action: 'fetchCSS' });
     },
 
-    // for the devtools, a _port property (MessageChannel port) is set on
-    // this object to communicate with the extension (in _connectToContentScript)
-
-    // for the bookmarklet, an _openedWindow property is set on this object
-    // to communicate with the theme editor running in another window
+    // for chrome and the bookmarklet, a _port property (MessageChannel port) is set on
+    // this object to communicate with the theme editor
     postMessage: function(message) {
-      if (global._openedWindow) {
-        global._openedWindow.postMessage(message, '*');
-      } else if (this._port) {
-        this._port.postMessage(message);
-      }
+      this._port.postMessage(message);
     },
 
     send: function(actionName, data) {
@@ -182,8 +158,6 @@
         highlightBox.style.width = width + "px";
         highlightBox.style.height = height + "px";
       }
-
-      // componentEl.classList.add("elemental-inspected");
     },
 
     // determine if ember component and send message w/ component if true
@@ -212,7 +186,7 @@
   };
 
   function isComponent(el) {
-    return el.className.indexOf('ember-view') !== -1;
+    return el.classList.contains('ember-view');
   }
 
   Elemental.init();

@@ -7,16 +7,25 @@ export default Ember.Service.extend({
   _reloadCSSReady: false,
   _bookmarkletInspectedWindowUrl: null,
   _bookmarkletInspectedWindowUrlResolve: null,
+  _contentScriptSetupResolve: null,
 
   init() {
     // this is starting to get gross - might want to split bookmarklet and chrome adapters up
     this._super(...arguments);
     this.router = this.container.lookup('router:main');
 
-    this._setupDeferred = Ember.RSVP.defer();
+    this._contentScriptSetupPromise = new Promise(resolve => {
+      if (this._isChromeDevtools()) {
+        this._contentScriptSetupResolve = resolve;
+      } else if (window.opener) {
+        resolve();
+      } else if (ElementalThemeEditor.testing) {
+        resolve();
+      }
+    });
+
     this._loadingActionsPromise = this._loadElementalActions();
 
-    debugger;
     this._bookmarkletInspectedWindowUrlPromise = new Promise(resolve => {
       if (this._isChromeDevtools()) {
         resolve();
@@ -54,7 +63,7 @@ export default Ember.Service.extend({
         } else if (window.opener) {
           resolve(this._bookmarkletInspectedWindowUrl);
         } else if (ElementalThemeEditor.testing) {
-          callback('http://testing-url:1337');
+          resolve('http://testing-url:1337');
         }
       });
     });
@@ -82,31 +91,19 @@ export default Ember.Service.extend({
   },
 
   _bookmarkletSetup() {
-    debugger;
+
     let channel = new MessageChannel();
     this._port = channel.port1;
     let message = { action: 'ete-port-setup' };
     let stringifiedMessage = JSON.stringify(message);
 
-    // this shouldn't even have to happen
-    // refactor the init/_loadElementalActions
-    this._setupDeferred.resolve();
-
     this._port.onmessage = event => {
-      debugger;
+
       let message = event.data;
       this._handleIncomingMessage(message);
     };
 
     window.opener.postMessage(stringifiedMessage, '*', [channel.port2]);
-
-    // // because the event listener is usually not set up by the
-    // //  time fetchCSS is fired, the initial reloadCSS is handled here
-    // if (this._theme) {
-    //   this.callAction('reloadCSS', this._theme);
-    // } else {
-    //   this._reloadCSSReady = true;
-    // }
   },
 
   _handleIncomingMessage(message) {
@@ -120,11 +117,10 @@ export default Ember.Service.extend({
       let componentName = message.data;
       this.router.transitionTo('component', componentName);
     } else if (message.action === 'el-cs-init-complete') {
-      this._setupDeferred.resolve();
       // once content script init is complete,
       // devtools evals EA to inspected window
+      this._contentScriptSetupResolve();
     } else if (message.action === 'ete-port-setup-complete') {
-      debugger;
       this._bookmarkletInspectedWindowUrl = message.data;
       this._bookmarkletInspectedWindowUrlResolve();
     }
@@ -147,15 +143,14 @@ export default Ember.Service.extend({
   },
 
   _loadElementalActions() {
-    return this._setupDeferred.promise.then(() => {
+    return this._contentScriptSetupPromise.then(() => {
       return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         let url;
 
-        // if bookmarklet or not chrome devtools, immediately exit because
-        // elemental-actions.js is either already loaded (bookmarklet)
-        // or not supported yet (ff devtools)
-        if (window.opener || !this._isChromeDevtools()) {
+        // the content script promise filters out the bookmarklet
+        // because it is already loaded, but ff devtools are not supported yet
+        if (!this._isChromeDevtools()) {
           resolve();
           return;
         }

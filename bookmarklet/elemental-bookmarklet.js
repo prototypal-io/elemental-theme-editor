@@ -1,4 +1,4 @@
-// Actual Bookmarklet that loads this file:
+// What the actual Bookmarklet will look like:
 //
 // javascript: (function() {
 //   var s = document.createElement('script');
@@ -8,23 +8,9 @@
 
 // for now just put all this in the bookmark location :)
 
+// NOTE: firefox doesn't like minified js bookmarklets
 
-// firefox doesn't like minified js bookmarklets
 // javascript:
-
-// idea:
-// var link = document.createElement('link');
-// link.rel ='stylesheet';
-// link.type = 'text/css';
-// link.href = url + '/elemental-styles.css';
-// document.head.appendChild(link);
-
-// var Elemental = window.Elemental;
-// if (Elemental) { Elemental.send(action); }
-
-// TODO: you should be able to serve this from the ember-cli addon via express? or use a known URL
-
-
 (function() {
   var url = 'http://localhost:5555';
   var themeEditorWindow;
@@ -43,7 +29,6 @@
         port,
         response;
     if (action === 'ete-port-setup') {
-      debugger;
       port = event.ports[0];
       if (Elemental) {
         Elemental._port = port;

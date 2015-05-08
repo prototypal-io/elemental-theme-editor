@@ -50,14 +50,10 @@ export default Ember.Component.extend({
         this._theme = theme;
         this.setProperties(theme.globals);
 
-        if (window.opener) {
-          adapter.callAction('reloadCSS', theme);
-        }
-        
-        // debugger;
         // if the adapter/ele-actions.js is ready to reload the CSS,
+        // or it's the bookmarklet (we already know EA.js is loaded)
         // do it - otherwise, set the loaded theme on the adapter
-        if (adapter._reloadCSSReady) {
+        if (adapter._reloadCSSReady || window.opener) {
           adapter.callAction('reloadCSS', theme);
         } else {
           adapter._theme = theme;
