@@ -20,10 +20,17 @@ export default Ember.Service.extend({
     this._inspectedWindowUrlPromise = this._loadInspectedWindowUrl();
 
     if (this._isChromeDevtools()) {
+      this._handleChromeReload();
       this._setupChromeBackgroundPage();
     } else if (window.opener) {
       this._bookmarkletSetup();
     }
+  },
+
+  _handleChromeReload() {
+    chrome.devtools.network.onNavigated.addListener(function() {
+      location.reload(true);
+    });
   },
 
   _isChromeDevtools() {
