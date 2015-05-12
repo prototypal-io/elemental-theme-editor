@@ -42,30 +42,30 @@ export default Ember.Component.extend({
     let adapter = this.get('adapter');
 
     // TODO: Should likely be fetching our model data in the route
-    let xhr = new XMLHttpRequest();
     adapter._inspectedWindowUrlPromise.then(windowUrl => {
+      let xhr = new XMLHttpRequest();
       xhr.open('get', windowUrl + '/theme');
       xhr.send();
+
+      xhr.onload = () => {
+        Ember.run(() => {
+          console.log('loaded theme settings!');
+          let theme = JSON.parse(xhr.responseText) || null;
+          this._theme = theme;
+          this.setProperties(theme.globals);
+
+          // if the adapter/ele-actions.js is ready to reload the CSS,
+          // or it's the bookmarklet (we already know EA.js is loaded)
+          // do it - otherwise, set the loaded theme on the adapter
+          if (adapter._reloadCSSReady || window.opener) {
+            adapter.callAction('reloadCSS', theme);
+          } else {
+            // TODO: nuke me when we get proper theming support in our prebuilt CSS
+            adapter._theme = theme;
+          }
+        });
+      };
     });
-
-    xhr.onload = () => {
-      Ember.run(() => {
-        console.log('loaded theme settings!');
-        let theme = JSON.parse(xhr.responseText) || null;
-        this._theme = theme;
-        this.setProperties(theme.globals);
-
-        // if the adapter/ele-actions.js is ready to reload the CSS,
-        // or it's the bookmarklet (we already know EA.js is loaded)
-        // do it - otherwise, set the loaded theme on the adapter
-        if (adapter._reloadCSSReady || window.opener) {
-          adapter.callAction('reloadCSS', theme);
-        } else {
-          // TODO: nuke me when we get proper theming support in our prebuilt CSS
-          adapter._theme = theme;
-        }
-      });
-    };
   },
 
   actions: {

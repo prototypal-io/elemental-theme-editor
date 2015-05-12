@@ -23,7 +23,8 @@
     "currentPath",
     "currentRouteName",
     "fakehr",
-    "ElementalThemeEditor"
+    "ElementalThemeEditor",
+    "sinon"
   ],
   "node": false,
   "browser": false,

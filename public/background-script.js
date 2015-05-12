@@ -12,7 +12,6 @@
         // set up post message listening on CS
         chrome.tabs.sendMessage(message.tabId, { from: 'devtools', action: 'el-cs-init' });
       }
-
     	// other message handling
     }
 

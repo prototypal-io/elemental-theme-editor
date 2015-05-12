@@ -32,17 +32,19 @@ test('visit root and ensure theme.json data loads and save sends correct data', 
   andThen(() => {
     let request = fakehr.match('get', 'http://testing-url:1337/theme');
     request.respond(200, { 'Content-Type': 'application/json' }, JSON.stringify(themeJSON));
-    assert.equal(find('input[name=fontFamily]')[0].value, 'Arial');
+    assert.equal(find('input.input--font-family')[0].value, 'Arial');
     assert.equal(find('input[name=scale]')[0].value, '2:1');
     assert.equal(find('input[name=color]')[0].value, '#D8D8D8');
     assert.equal(find('input[name=surface]')[0].value, 'on');
 
     // set new global settings and save!
-    fillIn('input[name=fontFamily]', 'American Typewriter');
+    click('input.input--font-family').then(() => {
+      click('li:contains(Monaco)');
+    });
     fillIn('input[name=scale]', '4:3');
     fillIn('input[name=color]', '#112233');
     click('input[name=surface]').then(() => {
-      click('button.btn')[0];
+      click('button.btn');
     });
   });
 
@@ -51,11 +53,12 @@ test('visit root and ensure theme.json data loads and save sends correct data', 
     // there is a post request with the correct body
     let request = fakehr.match('POST', 'http://testing-url:1337/theme');
     let themeGlobals = JSON.parse(request.requestBody).globals;
-    assert.equal(find('input[name=fontFamily]')[0].value, 'American Typewriter');
+
+    assert.equal(find('input.input--font-family')[0].value, 'Monaco');
     assert.equal(find('input[name=scale]')[0].value, '4:3');
     assert.equal(find('input[name=color]')[0].value, '#112233');
     assert.equal(find('input[name=surface]')[0].checked, false);
-    assert.equal(themeGlobals.fontFamily, 'American Typewriter');
+    assert.equal(themeGlobals.fontFamily, 'Monaco');
     assert.equal(themeGlobals.scale, '4:3');
     assert.equal(themeGlobals.color, '#112233');
     assert.equal(themeGlobals.surface, false);

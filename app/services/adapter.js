@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import config from '../config/environment';
 
 export default Ember.Service.extend({
   _tabId: null,
@@ -45,12 +46,11 @@ export default Ember.Service.extend({
 
   _loadInspectedWindowUrl() {
     let deferred = this._findInspectedWindowUrlDeferred = Promise.defer();
-
     if (this._isChromeDevtools()) {
-      chrome.devtools.inspectedWindow.eval("window.location.origin", windowUrl => {
+      this._eval("window.location.origin", windowUrl => {
         deferred.resolve(windowUrl);
       });
-    } else if (ElementalThemeEditor.testing) {
+    } else if (config.environment === 'test') {
       deferred.resolve('http://testing-url:1337');
     }
 
@@ -129,8 +129,13 @@ export default Ember.Service.extend({
     }
   },
 
-  _eval(src) {
-    return chrome.devtools.inspectedWindow.eval(src);
+  _eval(str, callback) {
+    // can't bind eval in tests
+    if (config.environment === 'test') {
+      return chrome.devtools.inspectedWindow._eval(str, callback);
+    } else {
+      return chrome.devtools.inspectedWindow.eval(str, callback);
+    }
   },
 
   _loadElementalActions() {

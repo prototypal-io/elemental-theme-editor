@@ -13,6 +13,7 @@
     "ember-qunit-notifications": "0.0.7",
     "qunit": "~1.17.1",
     "pretender": "0.1.0",
-    "fakehr": "~0.1.0"
+    "fakehr": "~0.1.0",
+    "sinonjs": "~1.14.1"
   }
 }

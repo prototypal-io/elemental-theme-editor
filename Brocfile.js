@@ -1,6 +1,8 @@
 /* global require, module */
 
-var EmberApp = require('ember-cli/lib/broccoli/ember-app');
+var EmberApp = require('ember-cli/lib/broccoli/ember-app'),
+               isProduction = EmberApp.env() === 'production';
+
 
 var app = new EmberApp();
 
@@ -18,6 +20,11 @@ var app = new EmberApp();
 // along with the exports of each module as its value.
 
 app.import('vendor/iconic.min.js');
-app.import('bower_components/fakehr/fakehr.js');
+
+if (!isProduction) {
+  app.import(app.bowerDirectory + '/fakehr/fakehr.js', { type: 'test'});
+  app.import(app.bowerDirectory + '/sinonjs/sinon.js', { type: 'test' });
+}
+
 
 module.exports = app.toTree();
