@@ -2,16 +2,18 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   _theme: null,
-  _inspectActive: null,
 
+  inspector: Ember.inject.service(),
   adapter: Ember.inject.service(),
 
   fontFamily: null,
   scale: null,
   color: null,
   surface: false,
-  inspectActive: Ember.computed('_inspectActive', function() {
-    if (this._inspectActive) { return 'inspect-active'; }
+  inspectActive: Ember.computed('inspector.inspecting', function() {
+    if (this.get('inspector.inspecting')) {
+      return 'inspect-active';
+    }
   }),
 
   // TODO: auto-detect available fonts (if possible?)
@@ -96,7 +98,7 @@ export default Ember.Component.extend({
     },
 
     inspect() {
-      this.toggleProperty('_inspectActive');
+      this.get('inspector').toggleProperty('inspecting');
       this.get('adapter').callAction('inspect');
     }
   }
